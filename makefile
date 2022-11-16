@@ -1,5 +1,5 @@
-all: main.cpp
-	clang++ main.cpp -Wall -Wextra --std=c++20 -o main -fsanitize=address
+all: main.c
+	clang main.c -Wall -Wextra --std=c17 -o main -fsanitize=address
 
 .phony:
 	rm -f main
