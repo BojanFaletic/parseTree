@@ -21,14 +21,13 @@ static void free_tree_recursive(node_t *node) {
 }
 
 void free_tree(parser_t *tree) {
-  free_tree_recursive(tree->node);
+  free_tree_recursive(tree->next.node);
   free(tree);
 }
 
 parser_t *init_tree() {
   parser_t *tree = (parser_t *)malloc(sizeof(parser_t));
-  tree->node = 0;
-  tree->size = 0;
+  tree->next = (basic_node_t){.node = 0, .size=0};
   return tree;
 }
 
@@ -83,8 +82,8 @@ static int parse_recursive(string_t *string, node_t *node) {
 
 int parse(char const *name, parser_t *tree) {
   string_t string = {.data = (char *)name, .size = strlen(name)};
-  for (size_t n = 0; n < tree->size; n++) {
-    int status = parse_recursive(&string, tree->node + n);
+  for (size_t n = 0; n < tree->next.size; n++) {
+    int status = parse_recursive(&string, tree->next.node + n);
     if (status != MSG_NOT_FOUND) {
       return status;
     }

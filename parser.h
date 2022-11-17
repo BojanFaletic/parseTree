@@ -27,8 +27,7 @@ typedef struct node_t {
 
 // container used for holding root node
 typedef struct parser_t{
-  struct node_t *node;
-  size_t size;
+  basic_node_t next;
 } parser_t;
 
 
