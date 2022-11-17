@@ -15,20 +15,21 @@ int test_parse() {
 
   root->next = (basic_node_t) {.node = tree, .size=1};
 
-  add_node("ll", 2, tree);
-  add_node("llo", 3, tree);
-  add_node("ss", 7, tree);
+  add_node("ab", 2, tree);
+  add_node("cd", 3, tree);
+  add_node("ef", 7, tree);
 
   int status;
 
-  status = parse("He", root);
-  printf("Status He: %d\n", status == 1);
+  //status = parse("He", root);
+  //printf("Status He: %d\n", status == 1);
 
-  status = parse("Hello", root);
-  printf("Status Hello: %d\n", status == 3);
+  status = parse("Heab", root);
+  printf("Status Heab: %d\n", status);
 
-  status = parse("Hell", root);
-  printf("Status Hell: %d\n", status == 2);
+
+  status = parse("Hecd", root);
+  printf("Status Hecd: %d\n", status);
 
   status = parse("Hellok", root);
   printf("Status Hellok: %d\n", status);

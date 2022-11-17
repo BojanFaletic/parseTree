@@ -27,7 +27,7 @@ void free_tree(parser_t *tree) {
 
 parser_t *init_tree() {
   parser_t *tree = (parser_t *)malloc(sizeof(parser_t));
-  tree->next = (basic_node_t){.node = 0, .size=0};
+  tree->next = (basic_node_t){.node = 0, .size = 0};
   return tree;
 }
 
@@ -40,7 +40,7 @@ void add_node(const char *name, int const value, node_t *node) {
   node_t *new_nodes = (node_t *)malloc(sizeof(node_t) * N_new);
   memcpy(new_nodes, current_nodes, sizeof(node_t) * N);
 
-  new_nodes[N].message = (string_t){.data = (char *)name, .size = sizeof(name)};
+  new_nodes[N].message = (string_t){.data = (char *)name, .size = strlen(name)};
   new_nodes[N].value = value;
   node->next.node = new_nodes;
   node->next.size = N_new;
@@ -64,13 +64,17 @@ static bool string_compare(string_t const *name, string_t const *node_string) {
 }
 
 static int parse_recursive(string_t *string, node_t *node) {
+#if DEBUG
+  printf("MSG: %s Nd: %s M_sz: %zu Nd_sz: %zu\n", string->data,
+         node->message.data, string->size, node->message.size);
+#endif
   if (string_compare(string, &node->message)) {
     if (string->size == node->message.size) {
       return node->value;
     }
-
     string->data += node->message.size;
     string->size -= node->message.size;
+
     for (size_t n = 0; n < node->next.size; n++) {
       int value = parse_recursive(string, node->next.node + n);
       if (value != MSG_NOT_FOUND) {
