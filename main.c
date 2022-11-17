@@ -6,20 +6,22 @@
 #include "parser.h"
 
 int test_parse() {
-  root_node_t *root = init_tree();
+  parser_t *root = init_tree();
 
-  node_t *tree = (node_t*)malloc(sizeof(node_t));
-  string_t message = {.data=(char*)"He", .size=strlen("He")};
+  node_t *tree = (node_t *)malloc(sizeof(node_t));
+  string_t message = {.data = (char *)"He", .size = strlen("He")};
+  basic_node_t next = {.node = 0, .size = 0};
   tree->message = message;
+  tree->next = next;
   tree->value = 1;
-  tree->size = 0;
-  tree->next = 0;
 
-  root->nodes = &tree;
+  root->node = tree;
   root->size = 1;
 
   add_node("ll", 2, tree);
   add_node("llo", 3, tree);
+  //add_node("ss", 7, tree);
+
   int status;
 
   status = parse("He", root);

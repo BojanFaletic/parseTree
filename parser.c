@@ -1,73 +1,56 @@
 #include <stdbool.h>
-#if DEBUG
 #include <stdio.h>
-#endif
 #include <stdlib.h>
 #include <string.h>
 
 #include "parser.h"
 
 static void free_tree_recursive(node_t *node) {
-  if (node->size == 0) {
-#if DEBUG
-    printf("Free node: %s \n", node->message.data);
-#endif
-    free(node);
+  if (node == NULL) {
     return;
   }
-  for (size_t i = 0; i < node->size; i++) {
-    free_tree_recursive(node->next[i]);
+
+  if (node->next.node != NULL) {
+    free(node->next.node);
+    return;
+  }
+
+  for (size_t n = 0; n < node->next.size; n++) {
+    free_tree_recursive(node->next.node + n);
   }
 }
 
-void free_tree(root_node_t *tree) {
-  for (size_t n = 0; n < tree->size; n++) {
-    free_tree_recursive(tree->nodes[n]);
-  }
-#if DEBUG
-  printf("Free node pointers\n");
-#endif
+void free_tree(parser_t *tree) {
+  free_tree_recursive(tree->node);
   free(tree);
 }
 
-root_node_t *init_tree() {
-  root_node_t *tree = (root_node_t *)malloc(sizeof(root_node_t));
-  tree->nodes = 0;
+parser_t *init_tree() {
+  parser_t *tree = (parser_t *)malloc(sizeof(parser_t));
+  tree->node = 0;
   tree->size = 0;
   return tree;
 }
 
 void add_node(const char *name, int const value, node_t *node) {
-  node_t **current_nodes = node->next;
-  size_t const N = node->size;
+  node_t *current_nodes = node->next.node;
+  size_t const N = node->next.size;
   size_t const N_new = N + 1;
 
-  // create new node
-  node_t *new_node = (node_t *)malloc(sizeof(node_t));
-  new_node->next = 0;
-  new_node->size = 0;
-  new_node->value = value;
-
-  string_t message = {.data = (char *)name, .size = sizeof(name)};
-  new_node->message = message;
-
   // new next buffer
-  node_t **new_nodes = (node_t **)malloc(sizeof(node_t *) * N_new);
+  node_t *new_nodes = (node_t *)malloc(sizeof(node_t) * N_new);
+  memcpy(new_nodes, current_nodes, sizeof(node_t) * N);
 
-  for (size_t i = 0; i < N; i++) {
-    new_nodes[i] = current_nodes[i];
-  }
-  new_nodes[N] = new_node;
-
-  node->next = new_nodes;
-  node->size = N_new;
-
+  new_nodes[N].message = (string_t){.data = (char *)name, .size = sizeof(name)};
+  new_nodes[N].value = value;
+  node->next.node = new_nodes;
+  node->next.size = N_new;
   free(current_nodes);
 }
 
-node_t *get_end_node(const char *name, root_node_t *tree) { return 0; }
+node_t *get_end_node(const char *name, parser_t *tree) { return 0; }
 
-void add_word(const char *name, int const value, root_node_t *tree) {}
+void add_word(const char *name, int const value, parser_t *tree) {}
 
 static bool string_compare(string_t const *name, string_t const *node_string) {
   if (name->size < node_string->size) {
@@ -81,27 +64,27 @@ static bool string_compare(string_t const *name, string_t const *node_string) {
   return true;
 }
 
-static int parse_recursive(string_t *string, node_t const *node) {
+static int parse_recursive(string_t *string, node_t *node) {
   if (string_compare(string, &node->message)) {
     if (string->size == node->message.size) {
       return node->value;
     }
-    for (size_t n = 0; n < node->size; n++) {
+    for (size_t n = 0; n < node->next.size; n++) {
       string->data += node->message.size;
       string->size -= node->message.size;
-      int status = parse_recursive(string, node->next[n]);
-      if (status != MSG_NOT_FOUND) {
-        return status;
+      int value = parse_recursive(string, node->next.node + n);
+      if (value != MSG_NOT_FOUND) {
+        return value;
       }
     }
   }
   return MSG_NOT_FOUND;
 }
 
-int parse(char const *name, root_node_t *tree) {
+int parse(char const *name, parser_t *tree) {
   string_t string = {.data = (char *)name, .size = strlen(name)};
   for (size_t n = 0; n < tree->size; n++) {
-    int status = parse_recursive(&string, tree->nodes[n]);
+    int status = parse_recursive(&string, tree->node + n);
     if (status != MSG_NOT_FOUND) {
       return status;
     }
