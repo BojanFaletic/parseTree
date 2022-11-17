@@ -1,5 +1,7 @@
-all: main.c
-	clang main.c -Wall -Wextra --std=c17 -o main -fsanitize=address
+CBUILD = -Wall -Wextra --std=c17 -O0
+
+all: main.c parser.c
+	clang $^ $(CBUILD) -o main -fsanitize=address -DDEBUG
 
 .phony:
 	rm -f main
