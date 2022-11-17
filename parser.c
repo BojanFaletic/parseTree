@@ -68,9 +68,10 @@ static int parse_recursive(string_t *string, node_t *node) {
     if (string->size == node->message.size) {
       return node->value;
     }
+
+    string->data += node->message.size;
+    string->size -= node->message.size;
     for (size_t n = 0; n < node->next.size; n++) {
-      string->data += node->message.size;
-      string->size -= node->message.size;
       int value = parse_recursive(string, node->next.node + n);
       if (value != MSG_NOT_FOUND) {
         return value;

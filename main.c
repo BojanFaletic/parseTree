@@ -17,7 +17,7 @@ int test_parse() {
 
   add_node("ll", 2, tree);
   add_node("llo", 3, tree);
-  //add_node("ss", 7, tree);
+  add_node("ss", 7, tree);
 
   int status;
 
