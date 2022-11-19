@@ -32,8 +32,18 @@ int test_parse() {
   return 0;
 }
 
+
+int test_add_word(){
+  parser_t *root = init_tree();
+  add_word("He", 1, root);
+
+  free_tree(root);
+  return 0;
+}
+
 int main() {
 
-  test_parse();
+  //test_parse();
+  test_add_word();
   return 0;
 }

@@ -5,6 +5,51 @@
 
 #include "parser.h"
 
+static bool is_valid_node(string_t const *name, node_t const *node) {
+  string_t const *node_v = &node->message;
+
+  if (name->size < node_v->size) {
+    return false;
+  }
+  for (size_t i = 0; i < node_v->size; i++) {
+    if (name->data[i] != node_v->data[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void find_end_node(parser_t *tree, node_t **end) {
+  basic_node_t *data_node = &tree->next;
+  node_t *pointer_node;
+
+  *end = NULL;
+  if (data_node->size == 0) {
+    return;
+  }
+
+  // find single node
+  bool continue_searching = true;
+  while (continue_searching) {
+    continue_searching = false;
+
+    for (size_t n = 0; n < data_node->size; n++) {
+      pointer_node = &data_node->node[n];
+      if (pointer_node != NULL) {
+        continue_searching = true;
+        *data_node = pointer_node->next;
+        *end = pointer_node;
+        break;
+      }
+    }
+  }
+}
+
+void free_node(node_t **nd) {
+  free(*nd);
+  *nd = 0;
+}
+
 static void free_tree_recursive(node_t *node) {
   if (node == NULL) {
     return;
@@ -21,7 +66,15 @@ static void free_tree_recursive(node_t *node) {
 }
 
 void free_tree(parser_t *tree) {
-  free_tree_recursive(tree->next.node);
+  while (true) {
+    node_t *nd;
+    find_end_node(tree, &nd);
+    if (nd == NULL){
+      break;
+    }
+    free_node(&nd);
+  }
+
   free(tree);
 }
 
@@ -47,20 +100,47 @@ void add_node(const char *name, int const value, node_t *node) {
   free(current_nodes);
 }
 
-node_t *get_end_node(const char *name, parser_t *tree) { return 0; }
+node_t *get_end_node(const char *name, parser_t *tree) {
+  string_t string = {.data = (char *)name, .size = strlen(name)};
+  basic_node_t *tmp = &tree->next;
+  node_t *selected_nd = 0;
 
-void add_word(const char *name, int const value, parser_t *tree) {}
-
-static bool string_compare(string_t const *name, string_t const *node_string) {
-  if (name->size < node_string->size) {
-    return false;
+  // No previus node exist need to make new
+  if (tree->next.size == 0) {
+    return selected_nd;
   }
-  for (size_t i = 0; i < node_string->size; i++) {
-    if (name->data[i] != node_string->data[i]) {
-      return false;
+
+  bool keep_searching = true;
+  while (keep_searching) {
+    keep_searching = false;
+    for (size_t n = 0; n < tmp->size; n++) {
+      selected_nd = tmp->node + n;
+      if (is_valid_node(&string, selected_nd)) {
+        string.size -= selected_nd->message.size;
+        string.data += selected_nd->message.size;
+
+        tmp = &selected_nd->next;
+        keep_searching = true;
+        break;
+      }
     }
   }
-  return true;
+  return selected_nd;
+}
+
+void add_word(const char *name, int const value, parser_t *tree) {
+  node_t *end_node = get_end_node(name, tree);
+  if (end_node == NULL) {
+    printf("Adding node\n");
+
+    node_t *nd = (node_t *)malloc(sizeof(node_t));
+    nd->message = (string_t){.data = (char *)name, .size = strlen(name)};
+    nd->next = (basic_node_t){.node = 0, .size = 0};
+    nd->value = value;
+
+    tree->next = (basic_node_t){.node = nd, .size = 1};
+    return;
+  }
 }
 
 static int parse_recursive(string_t *string, node_t *node) {
@@ -68,7 +148,7 @@ static int parse_recursive(string_t *string, node_t *node) {
   printf("MSG: %s Nd: %s M_sz: %zu Nd_sz: %zu\n", string->data,
          node->message.data, string->size, node->message.size);
 #endif
-  if (string_compare(string, &node->message)) {
+  if (is_valid_node(string, node)) {
     if (string->size == node->message.size) {
       return node->value;
     }

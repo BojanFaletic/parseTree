@@ -37,3 +37,4 @@ void free_tree(parser_t *tree);
 
 // temp
 void add_node(const char *name, int const value, node_t *node);
+void add_word(const char *name, int const value, parser_t *tree);
