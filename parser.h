@@ -26,9 +26,7 @@ typedef struct node_t {
 } node_t;
 
 // container used for holding root node
-typedef struct parser_t{
-  basic_node_t next;
-} parser_t;
+typedef struct basic_node_t parser_t;
 
 
 parser_t *init_tree();
@@ -38,3 +36,4 @@ void free_tree(parser_t *tree);
 // temp
 void add_node(const char *name, int const value, node_t *node);
 void add_word(const char *name, int const value, parser_t *tree);
+node_t *get_end_node(char **name, parser_t *tree);
