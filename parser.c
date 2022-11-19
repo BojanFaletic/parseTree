@@ -19,60 +19,35 @@ static bool is_valid_node(string_t const *name, node_t const *node) {
   return true;
 }
 
-void find_end_node(parser_t *tree, node_t **end) {
+static node_t *find_end_node(parser_t *tree) {
   basic_node_t *data_node = &tree->next;
-  node_t *pointer_node;
+  node_t *end = NULL;
 
-  *end = NULL;
   if (data_node->size == 0) {
-    return;
+    return NULL;
   }
 
-  // find single node
-  bool continue_searching = true;
-  while (continue_searching) {
-    continue_searching = false;
 
-    for (size_t n = 0; n < data_node->size; n++) {
-      pointer_node = &data_node->node[n];
-      if (pointer_node != NULL) {
-        continue_searching = true;
-        *data_node = pointer_node->next;
-        *end = pointer_node;
-        break;
-      }
+start_search:
+  for (size_t n = 0; n < data_node->size; n++) {
+    node_t *pointer_node = &data_node->node[n];
+    if (pointer_node != NULL) {
+      *data_node = pointer_node->next;
+      end = pointer_node;
+      goto start_search;
     }
   }
-}
-
-void free_node(node_t **nd) {
-  free(*nd);
-  *nd = 0;
-}
-
-static void free_tree_recursive(node_t *node) {
-  if (node == NULL) {
-    return;
-  }
-
-  if (node->next.node != NULL) {
-    free(node->next.node);
-    return;
-  }
-
-  for (size_t n = 0; n < node->next.size; n++) {
-    free_tree_recursive(node->next.node + n);
-  }
+  return end;
 }
 
 void free_tree(parser_t *tree) {
   while (true) {
-    node_t *nd;
-    find_end_node(tree, &nd);
-    if (nd == NULL){
+    node_t *nd = find_end_node(tree);
+    if (nd == NULL) {
       break;
     }
-    free_node(&nd);
+    free(nd);
+    nd = 0;
   }
 
   free(tree);
