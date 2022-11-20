@@ -6,5 +6,8 @@
     "clang-tidy.compilerArgsBefore": [
         "-Iinc",
         "--std=c17"
-    ]
+    ],
+    "files.associations": {
+        "export": "c"
+    }
 }

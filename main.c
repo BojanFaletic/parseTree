@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "parser.h"
+#include "list.h"
 
 void check(const char *test, parser_t *root) {
   int status = parse(test, root);
@@ -40,9 +41,22 @@ int test_add_word(){
   return 0;
 }
 
+int test_list(){
+  list_holder_t *list = list_init();
+  list_append("Hello", list);
+  list_append("World", list);
+
+  printf("list: %s\n", (char*)list_data(0, list));
+  printf("list: %s\n", (char*)list_data(1, list));
+
+  list_free(list);
+  return  0;
+}
+
 int main() {
 
-  test_parse();
+  //test_parse();
   //test_add_word();
+  test_list();
   return 0;
 }
