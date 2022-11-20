@@ -46,6 +46,7 @@ void free_v3(parser_t *tree) {
 
   node_t *tmp = tree->node;
   list_append(tmp, list);
+
   bool end = false;
   while (!end) {
     end = true;

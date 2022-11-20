@@ -16,14 +16,19 @@ void list_free(list_holder_t *list) {
 }
 
 void list_append(void *data, list_holder_t *list) {
-  find_end(&list);
-  list_holder_t *new = (list_holder_t *)malloc(sizeof(list_holder_t));
-  *new = (list_holder_t){.next = NULL, .prev = list, .data = data};
-  list->next = new;
+  if (list->data == NULL){
+    list->data = data;
+  }
+  else{
+    find_end(&list);
+    list_holder_t *new = (list_holder_t *)malloc(sizeof(list_holder_t));
+    *new = (list_holder_t){.next = NULL, .prev = list, .data = data};
+    list->next = new;
+  }
 }
 
 void *list_data(size_t depth, list_holder_t *list) {
-  while ((depth + 1) != 0) {
+  while (depth != 0) {
     if (list->next != NULL) {
       list = list->next;
       depth--;
@@ -40,7 +45,7 @@ size_t list_depth(list_holder_t *list){
     list = list->next;
     depth++;
   }
-  return depth;
+  return depth + 1;
 }
 
 static void find_end(list_holder_t **list) {
