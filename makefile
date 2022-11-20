@@ -10,7 +10,7 @@ release: $(SRCS)
 	clang $^ $(CBUILD) -O2 -o main $(INC)
 
 debug: $(SRCS)
-	clang $^ $(CBUILD) -o main -fsanitize=address -DDEBUG $(INC)
+	clang $^ $(CBUILD) -o main -fsanitize=address -DPARSER_DEBUG $(INC)
 
 clear:
 	@rm -f main

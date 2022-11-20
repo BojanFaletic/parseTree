@@ -6,7 +6,7 @@ int main() {
   if (status != 0) {
     printf("Tests failed\n");
   } else {
-    printf("Tests success\n");
+    printf("Tests PARSER_SUCCESS\n");
   }
   return status;
 }

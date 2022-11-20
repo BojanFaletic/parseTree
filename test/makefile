@@ -5,8 +5,8 @@ INC = -I../inc
 all: $(SRCS)
 	clang $^ $(CBUILD) -o main -fsanitize=address $(INC)
 
-debug: $(SRCS)
-	clang $^ $(CBUILD) -o main -fsanitize=address -DDEBUG $(INC)
+PARSER_DEBUG: $(SRCS)
+	clang $^ $(CBUILD) -o main -fsanitize=address -DPARSER_DEBUG $(INC)
 
 clear:
 	@rm -f main
