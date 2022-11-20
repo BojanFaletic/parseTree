@@ -1,6 +1,7 @@
 #include "tests.h"
 #include <stdio.h>
 
+
 int main() {
   int status = test_parser();
   if (status != 0) {
