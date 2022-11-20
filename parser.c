@@ -23,35 +23,70 @@ static bool is_valid_node(string_t const *name, node_t const *node) {
   return true;
 }
 
-static node_t *find_end_node(parser_t *tree) {
-  if (tree->size == 0 || tree->node == NULL) {
-    return NULL;
+bool free_v2(parser_t **tree){
+  if (tree == NULL){
+    return false;
+  }
+  node_t *parent = (*tree)->node;
+  if (parent == NULL){
+    free(*tree);
+    *tree = NULL;
+    printf("-Tree\n");
+    return false;
   }
 
-  node_t *end = tree->node;
+  node_t *child = parent->node;
+
+  if (child == NULL){
+    printf("-Freeing: %s\n", parent->message.data);
+    free(parent);
+    printf("-Tree\n");
+
+    free(*tree);
+    *tree = 0;
+
+    return false;
+  }
+
+  bool found = false;
 start_search:
-  for (size_t n = 0; n < end->size; n++) {
-    node_t *pointer_node = &end->node[n];
-    if (pointer_node != NULL) {
-      end = pointer_node;
+  for (size_t n=0; n<child->size; n++){
+    node_t *tmp = child->node + n;
+    if (tmp != NULL){
+      parent = child;
+      child = tmp;
+      found = true;
       goto start_search;
     }
   }
-  return end;
+  printf("-Freeing: %s\n", child->message.data);
+
+  free(child);
+  parent->node = 0;
+  return found;
+}
+
+static node_t *find_end_node(parser_t *tree) {
+  node_t *end = tree->node;
+  if (tree->size == 0 || end == NULL) {
+    return NULL;
+  }
+
+start_search:
+  for (size_t n = 0; n < end->size; n++) {
+    if (&end->node[n] != NULL) {
+      end = &end->node[n];
+      goto start_search;
+    }
+  }
+  return NULL;
 }
 
 void free_tree(parser_t *tree) {
-  while (true) {
-    node_t *nd = find_end_node(tree);
-    if (nd == NULL) {
-      break;
-    }
-    printf("-Freeing: %s\n", nd->message.data);
-    free(nd);
-    nd = 0;
+  while (free_v2(&tree)){
+    printf(". ");
   }
-
-  free(tree);
+  printf(" \n");
 }
 
 parser_t *init_tree() {
@@ -62,8 +97,10 @@ parser_t *init_tree() {
 
 void link_node(node_t **parent, node_t *child){
   node_t *current_nodes = *parent;
-  size_t const N = (*parent)->size;
+  size_t const N = current_nodes->size;
   size_t const N_new = N + 1;
+
+  printf("N: %zu\n", N);
 
   node_t *new_nodes = (node_t *)malloc(sizeof(node_t) * N_new);
   memcpy(new_nodes, current_nodes, sizeof(node_t) * N);
@@ -93,7 +130,7 @@ node_t *get_end_node(char **name, parser_t *tree) {
 
   string_t string = {.data = (char *)*name, .size = strlen(*name)};
   node_t *tmp = tree->node;
-  node_t *selected_nd = 0;
+  node_t *selected_nd = tmp;
   bool keep_searching = true;
 
   while (keep_searching) {
@@ -141,7 +178,15 @@ void add_word(const char *name, int const value, parser_t *tree) {
   char *part_name = (char *)name;
   node_t *end_node = get_end_node(&part_name, tree);
   if (end_node == NULL) {
-    add_node(name, value, &end_node);
+    printf("+Adding: %s\n", name);
+    node_t *nd = (node_t*)malloc(sizeof(node_t));
+    nd->message = (string_t){.data=(char*)name, .size=strlen(name)};
+    nd->node = NULL;
+    nd->size = 0;
+    nd->value = value;
+
+    tree->node = nd;
+    tree->size = 1;
     return;
   }
 
@@ -160,6 +205,7 @@ void add_word(const char *name, int const value, parser_t *tree) {
       break;
     }
   }
+  return;
 
   // merge current + candidate into new node
   if (n_same_letters != 0){

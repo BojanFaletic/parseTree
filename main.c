@@ -17,7 +17,7 @@ int test_parse() {
   add_word(root_value, 1, root);
   node_t *tree = get_end_node(&root_value, root);
 
-  add_node("ab", 2, tree);
+  add_node("ab", 2, &tree);
   //add_node("cd", 3, tree);
   //add_node("ef", 7, tree);
 
