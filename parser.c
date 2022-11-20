@@ -24,18 +24,15 @@ static bool is_valid_node(string_t const *name, node_t const *node) {
 }
 
 static node_t *find_end_node(parser_t *tree) {
-  basic_node_t *data_node = tree;
-  node_t *end = NULL;
-
-  if (data_node->size == 0) {
+  if (tree->size == 0 || tree->node == NULL) {
     return NULL;
   }
 
+  node_t *end = tree->node;
 start_search:
-  for (size_t n = 0; n < data_node->size; n++) {
-    node_t *pointer_node = &data_node->node[n];
+  for (size_t n = 0; n < end->size; n++) {
+    node_t *pointer_node = &end->node[n];
     if (pointer_node != NULL) {
-      *data_node = pointer_node->next;
       end = pointer_node;
       goto start_search;
     }
@@ -59,26 +56,27 @@ void free_tree(parser_t *tree) {
 
 parser_t *init_tree() {
   parser_t *tree = (parser_t *)malloc(sizeof(parser_t));
-  *tree = (basic_node_t){.node = 0, .size = 0};
+  *tree = (parser_t){.node = 0, .size = 0};
   return tree;
 }
 
-void link_node(node_t *parent, node_t *child){
-  node_t *current_nodes = parent->next.node;
-  size_t const N = parent->next.size;
+void link_node(node_t **parent, node_t *child){
+  node_t *current_nodes = *parent;
+  size_t const N = (*parent)->size;
   size_t const N_new = N + 1;
 
   node_t *new_nodes = (node_t *)malloc(sizeof(node_t) * N_new);
   memcpy(new_nodes, current_nodes, sizeof(node_t) * N);
-
   new_nodes[N] = *child;
-  parent->next = (basic_node_t){.node=new_nodes, .size=N_new};
+
+  *parent = new_nodes;
   free(current_nodes);
 }
 
-void add_node(const char *name, int const value, node_t *node) {
+void add_node(const char *name, int const value, node_t **node) {
   node_t child = {
-    .next = (basic_node_t){.node = NULL, .size=0},
+    .node = NULL,
+    .size = 0,
     .message= (string_t){.data=(char*)name, .size=strlen(name)},
     .value = value
     };
@@ -88,16 +86,16 @@ void add_node(const char *name, int const value, node_t *node) {
 }
 
 node_t *get_end_node(char **name, parser_t *tree) {
-  string_t string = {.data = (char *)*name, .size = strlen(*name)};
-  basic_node_t *tmp = tree;
-  node_t *selected_nd = 0;
-
   // No previous node exist need to make new
   if (tree->size == 0) {
-    return selected_nd;
+    return NULL;
   }
 
+  string_t string = {.data = (char *)*name, .size = strlen(*name)};
+  node_t *tmp = tree->node;
+  node_t *selected_nd = 0;
   bool keep_searching = true;
+
   while (keep_searching) {
     keep_searching = false;
     for (size_t n = 0; n < tmp->size; n++) {
@@ -106,7 +104,7 @@ node_t *get_end_node(char **name, parser_t *tree) {
         string.size -= selected_nd->message.size;
         string.data += selected_nd->message.size;
 
-        tmp = &selected_nd->next;
+        tmp = selected_nd;
         keep_searching = true;
         break;
       }
@@ -118,13 +116,13 @@ node_t *get_end_node(char **name, parser_t *tree) {
 
 void print_node(node_t *nd) {
   size_t non_zero_sz = 0;
-  for (size_t i = 0; i < nd->next.size; i++) {
-    if (&nd->next.node[i] != NULL) {
+  for (size_t i = 0; i < nd->size; i++) {
+    if (&nd->node[i] != NULL) {
       non_zero_sz++;
     }
   }
   printf("Nd: %s, value: %d, next sz: %zu, alloc sz: %zu\n", nd->message.data,
-         nd->value, nd->next.size, non_zero_sz);
+         nd->value, nd->size, non_zero_sz);
 }
 
 size_t n_common_letters(char *const name, node_t const *nd) {
@@ -143,19 +141,12 @@ void add_word(const char *name, int const value, parser_t *tree) {
   char *part_name = (char *)name;
   node_t *end_node = get_end_node(&part_name, tree);
   if (end_node == NULL) {
-    printf("+Adding: %s\n", name);
-
-    node_t *nd = (node_t *)malloc(sizeof(node_t));
-    nd->message =
-        (string_t){.data = (char *)part_name, .size = strlen(part_name)};
-    nd->next = (basic_node_t){.node = 0, .size = 0};
-    nd->value = value;
-
-    *tree = (basic_node_t){.node = nd, .size = 1};
+    add_node(name, value, &end_node);
     return;
   }
+
   // find candidate node
-  basic_node_t *next_node = &end_node->next;
+  node_t *next_node = end_node;
 
   size_t n_same_letters = 0;
   node_t *candidate;
@@ -178,7 +169,7 @@ void add_word(const char *name, int const value, parser_t *tree) {
 
   // add new intermediate node
   const char* new_node_msg = part_name + n_same_letters;
-  add_node(new_node_msg, MSG_NOT_FOUND, end_node);
+  add_node(new_node_msg, MSG_NOT_FOUND, &end_node);
 
 
   // update candidate node to new value
@@ -201,8 +192,8 @@ static int parse_recursive(string_t *string, node_t *node) {
     string->data += node->message.size;
     string->size -= node->message.size;
 
-    for (size_t n = 0; n < node->next.size; n++) {
-      int value = parse_recursive(string, node->next.node + n);
+    for (size_t n = 0; n < node->size; n++) {
+      int value = parse_recursive(string, node->node + n);
       if (value != MSG_NOT_FOUND) {
         return value;
       }
