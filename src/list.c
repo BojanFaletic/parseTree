@@ -8,7 +8,6 @@ list_holder_t *list_init() {
 
 void list_free(list_holder_t *list) {
   find_end(&list);
-
   while (list->prev != NULL) {
     list = list->prev;
     free(list->next);
@@ -33,6 +32,15 @@ void *list_data(size_t depth, list_holder_t *list) {
     }
   }
   return list->data;
+}
+
+size_t list_depth(list_holder_t *list){
+  size_t depth = 0;
+  while (list->next != NULL){
+    list = list->next;
+    depth++;
+  }
+  return depth;
 }
 
 static void find_end(list_holder_t **list) {

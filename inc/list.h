@@ -15,5 +15,8 @@ void list_free(list_holder_t *list);
 // add new item to end of list
 void list_append(void *data, list_holder_t *list);
 
+// get max depth of list
+size_t list_depth(list_holder_t *list);
+
 // get n item from list
 void *list_data(size_t depth, list_holder_t *list);

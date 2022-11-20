@@ -49,6 +49,8 @@ int test_list(){
   printf("list: %s\n", (char*)list_data(0, list));
   printf("list: %s\n", (char*)list_data(1, list));
 
+  printf("list depth: %zu\n", list_depth(list));
+
   list_free(list);
   return  0;
 }
