@@ -25,14 +25,23 @@ static bool is_valid_node(string_t const *name, node_t const *node) {
 }
 
 void print_list(list_holder_t *list) {
+  if (list == NULL){
+    return;
+  }
+
   while (list->next != NULL) {
     node_t *nd = list->data;
     if (nd == NULL){
       printf("Node corruption data is NULL\n");
       return;
     }
+
+    list = list->next;
     printf("List msg: %s\n", (char *)nd->message.data);
   }
+
+  node_t *nd1 = list->data;
+  printf("List msg: %s\n", (char *)nd1->message.data);
 }
 
 void free_v3(parser_t *tree) {
@@ -45,10 +54,11 @@ void free_v3(parser_t *tree) {
   }
 
   node_t *tmp = tree->node;
-  list_append(tmp, list);
 
   bool end = false;
   while (!end) {
+    list_append(tmp, list);
+
     end = true;
     for (size_t i = 0; i < N; i++) {
       node_t *nd = &tmp[i];
