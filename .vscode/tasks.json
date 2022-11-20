@@ -9,9 +9,11 @@
                 "--std=c17",
                 "-g",
                 "main.c",
+                "test/tests.c",
                 "src/parser.c",
                 "src/list.c",
                 "-Iinc",
+                "-Itest",
                 "-o",
                 "main"
             ],
