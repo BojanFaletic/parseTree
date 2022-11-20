@@ -124,7 +124,7 @@ void add_node(const char *name, int const value, node_t *node) {
   printf("+Adding: %s\n", name);
 }
 
-size_t n_common_letters(char *const name, node_t const *nd) {
+size_t n_common_letters(const char * name, node_t const *nd) {
   size_t const max_search = MIN(strlen(name), nd->message.size);
   size_t i;
 
@@ -206,6 +206,25 @@ void add_word(const char *name, int const value, parser_t *tree) {
     return;
   }
 
+  size_t n_same = n_common_letters(name, end_node);
+
+  // insert new intermediate node (Hello, Hey --> He, llo, y)
+  if (n_same != 0){
+    int value2 = end_node->value;
+    node_t *next2 = end_node->node;
+    size_t size2 = end_node->size;
+
+    // change current node
+    end_node->message.size = n_same;
+    end_node->value = -1;
+    end_node->node = NULL;
+    end_node->size = 0;
+
+    char *nd_name = &end_node->message.data[n_same];
+    add_node(nd_name, value2, end_node);
+    end_node->node[0].node = next2;
+    end_node->node[0].size = size2;
+  }
   add_node(part_name, value, end_node);
 }
 
