@@ -14,34 +14,6 @@ int check(const char *test, int expects, parser_t *root) {
   return PARSER_SUCCESS;
 }
 
-int test_parse() {
-  parser_t *root;
-  parser_init(&root);
-
-  char *root_value = (char *)"He";
-  parser_add(root_value, 1, root);
-  parser_node_t *tree = get_end_node(&root_value, root);
-  add_node("ab", 2, tree);
-  add_node("cd", 3, tree);
-  add_node("ef", 7, tree);
-  add_node("gf", 7, tree);
-  add_node("12", 7, tree);
-  add_node("22", 7, tree);
-  add_node("34", 7, tree);
-
-  parser_node_t *second = tree->node;
-  add_node("se", 2, second);
-  add_node("co", 2, second);
-
-  int status = PARSER_SUCCESS;
-  status |= check("He", 1, root);
-  status |= check("Hecd", 3, root);
-  status |= check("Heef", 7, root);
-
-  parser_free(root);
-  return status;
-}
-
 int test_parser_add() {
   parser_t *root;
   parser_init(&root);
@@ -108,7 +80,6 @@ int test_list() {
 int test_parser() {
 
   int status = PARSER_SUCCESS;
-  status |= test_parse();
   status |= test_parser_add();
   status |= test_parser_add2();
   status |= test_parser_add3();
