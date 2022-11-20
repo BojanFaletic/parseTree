@@ -41,44 +41,52 @@ void print_list(list_holder_t *list) {
   }
 
   node_t *nd1 = list->data;
+  if (nd1 == NULL){
+    return;
+  }
   printf("List msg: %s\n", (char *)nd1->message.data);
+}
+
+void map_all_nodes(node_t *nd, list_holder_t *list){
+  if (nd->size != 0){
+    list_append(nd->node, list);
+    printf("Adding: %zu\n", nd->size);
+  }
+
+  for (size_t i=0; i<nd->size; i++){
+    node_t *tmp = &nd->node[i];
+    map_all_nodes(tmp, list);
+  }
 }
 
 void free_v3(parser_t *tree) {
   list_holder_t *list = list_init();
-  size_t N = tree->size;
 
-  if (N == 0) {
-    free(tree);
-    return;
+  if (tree->size != 0){
+    list_append(tree->node, list);
   }
 
-  node_t *tmp = tree->node;
-
-  bool end = false;
-  while (!end) {
-    list_append(tmp, list);
-
-    end = true;
-    for (size_t i = 0; i < N; i++) {
-      node_t *nd = &tmp[i];
-      if (nd->size != 0) {
-        tmp = nd->node;
-        N = nd->size;
-        end = false;
-        break;
-      }
-    }
+  for (size_t i=0; i<tree->size; i++){
+    map_all_nodes(tree->node + i, list);
   }
-
   print_list(list);
 
+  find_end(&list);
+  while (list->prev != NULL){
+    node_t *nd = list->data;
+    printf("-Free: %s\n", nd->message.data);
+    free(nd);
+
+    list = list->prev;
+  }
+
+  // free last
+  node_t *nd2 = list->data;
+  printf("-Free: %s\n", nd2->message.data);
+  free(nd2);
+
+
   list_free(list);
-
-  printf("-Freeing: %s\n", tmp->message.data);
-  free(tmp);
-  printf("-Freeing: tree\n");
-
   free(tree);
 }
 

@@ -20,3 +20,9 @@ size_t list_depth(list_holder_t *list);
 
 // get n item from list
 void *list_data(size_t depth, list_holder_t *list);
+
+// get end item from list
+void *list_end(list_holder_t *list);
+
+// change pointer of list to end
+void find_end(list_holder_t **list);

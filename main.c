@@ -17,10 +17,13 @@ int test_parse() {
   char* root_value = (char*)"He";
   add_word(root_value, 1, root);
   node_t *tree = get_end_node(&root_value, root);
-
   add_node("ab", 2, tree);
-  //add_node("cd", 3, tree);
-  //add_node("ef", 7, tree);
+  add_node("cd", 3, tree);
+  add_node("ef", 7, tree);
+  add_node("gf", 7, tree);
+  add_node("12", 7, tree);
+  add_node("22", 7, tree);
+  add_node("34", 7, tree);
 
   //check("He", root);
   //check("Hecd", root);

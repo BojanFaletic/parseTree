@@ -1,7 +1,5 @@
 #include "list.h"
 
-static void find_end(list_holder_t **list);
-
 list_holder_t *list_init() {
   return (list_holder_t *)calloc(sizeof(list_holder_t), 1);
 }
@@ -48,7 +46,12 @@ size_t list_depth(list_holder_t *list){
   return depth + 1;
 }
 
-static void find_end(list_holder_t **list) {
+void *list_end(list_holder_t *list){
+  find_end(&list);
+  return list->data;
+}
+
+void find_end(list_holder_t **list) {
   while ((*list)->next != NULL) {
     *list = (*list)->next;
   }
