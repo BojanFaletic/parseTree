@@ -7,8 +7,13 @@ typedef struct list_holder_t {
   void *data;
 } list_holder_t;
 
+// initiate list
 list_holder_t *list_init();
-void list_append(void *data, list_holder_t *list);
-void *list_data(size_t depth, list_holder_t *list);
-
+// free list
 void list_free(list_holder_t *list);
+
+// add new item to end of list
+void list_append(void *data, list_holder_t *list);
+
+// get n item from list
+void *list_data(size_t depth, list_holder_t *list);
