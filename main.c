@@ -25,6 +25,10 @@ int test_parse() {
   add_node("22", 7, tree);
   add_node("34", 7, tree);
 
+  node_t *second = tree->node;
+  add_node("se", 2, second);
+  add_node("co", 2, second);
+
   //check("He", root);
   //check("Hecd", root);
   //check("Heef", root);

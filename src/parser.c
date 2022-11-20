@@ -59,24 +59,12 @@ void map_all_nodes(node_t *nd, list_holder_t *list){
   }
 }
 
-void free_v3(parser_t *tree) {
-  list_holder_t *list = list_init();
-
-  if (tree->size != 0){
-    list_append(tree->node, list);
-  }
-
-  for (size_t i=0; i<tree->size; i++){
-    map_all_nodes(tree->node + i, list);
-  }
-  print_list(list);
-
+void free_all_nodes_in_list(list_holder_t *list){
   find_end(&list);
   while (list->prev != NULL){
     node_t *nd = list->data;
     printf("-Free: %s\n", nd->message.data);
     free(nd);
-
     list = list->prev;
   }
 
@@ -84,84 +72,28 @@ void free_v3(parser_t *tree) {
   node_t *nd2 = list->data;
   printf("-Free: %s\n", nd2->message.data);
   free(nd2);
+}
 
+void free_tree(parser_t *tree) {
+  list_holder_t *list = list_init();
 
+  // add first layer
+  if (tree->size != 0){
+    list_append(tree->node, list);
+  }
+
+  // add first element of all next layers
+  for (size_t i=0; i<tree->size; i++){
+    map_all_nodes(tree->node + i, list);
+  }
+  print_list(list);
+  free_all_nodes_in_list(list);
   list_free(list);
   free(tree);
 }
 
-bool free_v2(parser_t **tree) {
-  if (tree == NULL) {
-    return false;
-  }
-  node_t *parent = (*tree)->node;
-  if (parent == NULL) {
-    free(*tree);
-    *tree = NULL;
-    printf("-Tree\n");
-    return false;
-  }
-
-  node_t *child = parent->node;
-
-  if (child == NULL) {
-    printf("-Freeing: %s\n", parent->message.data);
-    free(parent);
-    printf("-Tree\n");
-
-    free(*tree);
-    *tree = 0;
-
-    return false;
-  }
-
-  bool found = false;
-start_search:
-  for (size_t n = 0; n < child->size; n++) {
-    node_t *tmp = child->node + n;
-    if (tmp != NULL) {
-      parent = child;
-      child = tmp;
-      found = true;
-      goto start_search;
-    }
-  }
-  printf("-Freeing: %s\n", child->message.data);
-
-  free(child);
-  parent->node = 0;
-  return found;
-}
-
-static node_t *find_end_node(parser_t *tree) {
-  node_t *end = tree->node;
-  if (tree->size == 0 || end == NULL) {
-    return NULL;
-  }
-
-start_search:
-  for (size_t n = 0; n < end->size; n++) {
-    if (&end->node[n] != NULL) {
-      end = &end->node[n];
-      goto start_search;
-    }
-  }
-  return NULL;
-}
-
-void free_tree(parser_t *tree) {
-  free_v3(tree);
-  /*
-  while (free_v2(&tree)) {
-    printf(". ");
-  }
-  printf(" \n");
-  */
-}
-
 parser_t *init_tree() {
-  parser_t *tree = (parser_t *)malloc(sizeof(parser_t));
-  *tree = (parser_t){.node = 0, .size = 0};
+  parser_t *tree = (parser_t *)calloc(sizeof(parser_t), 1);
   return tree;
 }
 
