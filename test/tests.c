@@ -6,7 +6,7 @@
 #include "tests.h"
 
 int check(const char *test, int expects, parser_t *root) {
-  int status = parse(test, root);
+  int status = parser_parse(test, root);
   if (status != expects) {
     printf("Testing failed: %s: %d\n", test, status);
     return MSG_NOT_FOUND;
@@ -16,10 +16,10 @@ int check(const char *test, int expects, parser_t *root) {
 
 int test_parse() {
   parser_t *root;
-  init_tree(&root);
+  parser_init(&root);
 
   char *root_value = (char *)"He";
-  add_word(root_value, 1, root);
+  parser_add(root_value, 1, root);
   node_t *tree = get_end_node(&root_value, root);
   add_node("ab", 2, tree);
   add_node("cd", 3, tree);
@@ -38,56 +38,56 @@ int test_parse() {
   status |= check("Hecd", 3, root);
   status |= check("Heef", 7, root);
 
-  free_tree(root);
+  parser_free(root);
   return status;
 }
 
-int test_add_word() {
+int test_parser_add() {
   parser_t *root;
-  init_tree(&root);
+  parser_init(&root);
 
-  add_word("H", 1, root);
-  add_word("He", 2, root);
-  add_word("Hel", 3, root);
+  parser_add("H", 1, root);
+  parser_add("He", 2, root);
+  parser_add("Hel", 3, root);
 
-  add_word("Ha", 4, root);
+  parser_add("Ha", 4, root);
 
   int status = SUCCESS;
   status |= check("Hel", 3, root);
   status |= check("Ha", 4, root);
   status |= check("He", 2, root);
 
-  free_tree(root);
+  parser_free(root);
   return status;
 }
 
-int test_add_word2() {
+int test_parser_add2() {
   parser_t *root;
-  init_tree(&root);
+  parser_init(&root);
 
-  add_word("Hello", 1, root);
-  add_word("Hey", 2, root);
+  parser_add("Hello", 1, root);
+  parser_add("Hey", 2, root);
 
   int status = SUCCESS;
   status |= check("Hello", 1, root);
   status |= check("Hey", 2, root);
 
-  free_tree(root);
+  parser_free(root);
   return status;
 }
 
-int test_add_word3() {
+int test_parser_add3() {
   parser_t *root;
-  init_tree(&root);
+  parser_init(&root);
 
-  add_word("Hello", 1, root);
-  add_word("H", 2, root);
+  parser_add("Hello", 1, root);
+  parser_add("H", 2, root);
 
   int status = SUCCESS;
   status |= check("Hello", 1, root);
   status |= check("H", 2, root);
 
-  free_tree(root);
+  parser_free(root);
   return status;
 }
 
@@ -109,9 +109,9 @@ int test_parser() {
 
   int status = SUCCESS;
   status |= test_parse();
-  status |= test_add_word();
-  status |= test_add_word2();
-  status |= test_add_word3();
+  status |= test_parser_add();
+  status |= test_parser_add2();
+  status |= test_parser_add3();
 
   return status;
 }

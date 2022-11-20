@@ -1,6 +1,6 @@
 ## Parser
 
-Efficent string matching alg. Implemented with parse tree, runs in linear time.
+Efficent string matching alg. Implemented with parser_parse tree, runs in linear time.
 
 ``` c++
   Node nd{"H", 1};
@@ -9,7 +9,7 @@ Efficent string matching alg. Implemented with parse tree, runs in linear time.
   nd.add("Hello", 4);
 
   std::string input{"He"};
-  switch (nd.parse(input)){
+  switch (nd.parser_parse(input)){
     case 1:
         std::cout << "H \n";
         break;

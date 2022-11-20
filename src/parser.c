@@ -80,7 +80,7 @@ void free_all_nodes_in_list(list_holder_t *list) {
   free(nd2);
 }
 
-void free_tree(parser_t *tree) {
+void parser_free(parser_t *tree) {
   list_holder_t *list = list_init();
 
   // add first layer
@@ -100,7 +100,7 @@ void free_tree(parser_t *tree) {
   free(tree);
 }
 
-void init_tree(parser_t **tree){
+void parser_init(parser_t **tree){
   *tree = (parser_t *)calloc(sizeof(parser_t), 1);
 }
 
@@ -197,7 +197,7 @@ void print_node(node_t *nd) {
          nd->value, nd->size, non_zero_sz);
 }
 
-void add_word(const char *name, int const value, parser_t *tree) {
+void parser_add(const char *name, int const value, parser_t *tree) {
   char *part_name = (char *)name;
   node_t *end_node = get_end_node(&part_name, tree);
   if (end_node == NULL) {
@@ -260,7 +260,7 @@ static int parse_recursive(string_t *string, node_t *node) {
   return MSG_NOT_FOUND;
 }
 
-int parse(char const *name, parser_t *tree) {
+int parser_parse(char const *name, parser_t *tree) {
   string_t string = {.data = (char *)name, .size = strlen(name)};
   for (size_t n = 0; n < tree->size; n++) {
     int status = parse_recursive(&string, tree->node + n);

@@ -27,11 +27,12 @@ typedef struct parser_t{
 } parser_t;
 
 
-void init_tree(parser_t **tree);
-int parse(char const *name, parser_t *tree);
-void free_tree(parser_t *tree);
+// creating and freeing parser_parse tree
+void parser_init(parser_t **tree);
+void parser_free(parser_t *tree);
 
-// temp
-void add_node(const char *name, int const value, node_t *node);
-void add_word(const char *name, int const value, parser_t *tree);
-node_t *get_end_node(char **name, parser_t *tree);
+// add new word to parser
+void parser_add(const char *name, int const value, parser_t *tree);
+
+// return value for name, MSG_NOT_FOUND if not found
+int parser_parse(char const *name, parser_t *tree);
