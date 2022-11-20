@@ -1,0 +1,10 @@
+{
+    "clang-tidy.compilerArgs": [
+        "-Iinc",
+        "--std=c17"
+    ],
+    "clang-tidy.compilerArgsBefore": [
+        "-Iinc",
+        "--std=c17"
+    ]
+}
