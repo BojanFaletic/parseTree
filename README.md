@@ -1,30 +1,20 @@
 ## Parser
 
-Efficent string matching alg. Implemented with parse tree, runs in linear time.
+Efficient string decoding algorithm. It is implemented as parse tree with minimal memory allocations.
 
-``` c++
-  Node nd{"H", 1};
-  nd.add("He", 2);
-  nd.add("Hell", 3);
-  nd.add("Hello", 4);
+## Warning
+This is still in development and not yet sufficiently tested for deploying in production.
 
-  std::string input{"He"};
-  switch (nd.parse(input)){
-    case 1:
-        std::cout << "H \n";
-        break;
-    case 2:
-        std::cout << "HE \n";
-        break;
-    case 3:
-        std::cout << "HELL \n";
-        break;
-    case 4:
-        std::cout << "HELLO \n";
-        break;
-    default:
-        std::cout << "ERROR \n";
-        break;
-  }
+``` c
+  parser_t *root;
+  parser_init(&root);
 
+  // set parsing values
+  parser_add("Hello", 1, root);
+  parser_add("Hey", 2, root);
+
+  parser_parse("Hello", root);
+  parser_parse("Hey", root);
+
+  parser_free(root);
 ```

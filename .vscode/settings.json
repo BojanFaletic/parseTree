@@ -1,0 +1,15 @@
+{
+    "clang-tidy.compilerArgs": [
+        "-Iinc",
+        "-Itest",
+        "--std=c17"
+    ],
+    "clang-tidy.compilerArgsBefore": [
+        "-Iinc",
+        "-Itest",
+        "--std=c17"
+    ],
+    "files.associations": {
+        "export": "c"
+    }
+}
