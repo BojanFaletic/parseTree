@@ -159,13 +159,12 @@ node_t *get_end_node(char **name, parser_t *tree) {
   }
 
   string_t string = {.data = (char *)*name, .size = strlen(*name)};
-  node_t *selected_nd = tmp;
-  bool keep_searching = true;
 
+  bool keep_searching = true;
   while (keep_searching) {
     keep_searching = false;
     for (size_t n = 0; n < tmp->size; n++) {
-      selected_nd = tmp->node + n;
+      node_t *selected_nd = tmp->node + n;
       if (is_valid_node(&string, selected_nd)) {
         string.size -= selected_nd->message.size;
         string.data += selected_nd->message.size;
@@ -177,7 +176,7 @@ node_t *get_end_node(char **name, parser_t *tree) {
     }
   }
   *name = string.data;
-  return selected_nd;
+  return tmp;
 }
 
 void print_node(node_t *nd) {

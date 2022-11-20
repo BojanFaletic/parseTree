@@ -44,6 +44,12 @@ int test_add_word(){
   add_word("He", 2, root);
   add_word("Hel", 3, root);
 
+  add_word("Ha", 4, root);
+
+  check("Hel", root);
+  check("Ha", root);
+  check("He", root);
+
   free_tree(root);
   return 0;
 }
