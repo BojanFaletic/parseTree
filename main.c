@@ -64,8 +64,8 @@ int test_list(){
 
 int main() {
 
-  test_parse();
-  //test_add_word();
+  //test_parse();
+  test_add_word();
   //test_list();
   return 0;
 }

@@ -125,14 +125,40 @@ void add_node(const char *name, int const value, node_t *node) {
   printf("+Adding: %s\n", name);
 }
 
+size_t n_common_letters(char *const name, node_t const *nd) {
+  size_t const max_search = MIN(strlen(name), nd->message.size);
+  size_t i;
+
+  for (i = 0; i < max_search; i++) {
+    if (name[i] != nd->message.data[i]) {
+      return i;
+    }
+  }
+  return i;
+}
+
 node_t *get_end_node(char **name, parser_t *tree) {
   // No previous node exist need to make new
   if (tree->size == 0) {
     return NULL;
   }
 
+  node_t *tmp = NULL;
+  for (size_t i=0; i<tree->size; i++){
+    node_t *tmp2 = &tree->node[i];
+    size_t n = n_common_letters(*name, tmp2);
+    if (n!= 0){
+      *name += n;
+      tmp = tmp2;
+      break;
+    }
+  }
+
+  if (tmp == NULL){
+    return NULL;
+  }
+
   string_t string = {.data = (char *)*name, .size = strlen(*name)};
-  node_t *tmp = tree->node;
   node_t *selected_nd = tmp;
   bool keep_searching = true;
 
@@ -165,17 +191,7 @@ void print_node(node_t *nd) {
          nd->value, nd->size, non_zero_sz);
 }
 
-size_t n_common_letters(char *const name, node_t const *nd) {
-  size_t const max_search = MIN(strlen(name), nd->message.size);
-  size_t i;
 
-  for (i = 0; i < max_search; i++) {
-    if (name[i] != nd->message.data[i]) {
-      return i;
-    }
-  }
-  return i;
-}
 
 void add_word(const char *name, int const value, parser_t *tree) {
   char *part_name = (char *)name;
@@ -193,39 +209,7 @@ void add_word(const char *name, int const value, parser_t *tree) {
     return;
   }
 
-  // find candidate node
-  node_t *next_node = end_node;
-
-  size_t n_same_letters = 0;
-  node_t *candidate;
-  size_t n_th_node = 0;
-  for (n_th_node = 0; n_th_node < next_node->size; n_th_node++) {
-    candidate = &next_node->node[n_th_node];
-
-    // find same letters in node and current node
-    n_same_letters = n_common_letters(part_name, candidate);
-    if (n_same_letters != 0) {
-      break;
-    }
-  }
-  return;
-
-  // merge current + candidate into new node
-  if (n_same_letters != 0) {
-    candidate->message.data += n_same_letters;
-    candidate->message.size -= n_same_letters;
-  }
-
-  // add new intermediate node
-  const char *new_node_msg = part_name + n_same_letters;
-  add_node(new_node_msg, MSG_NOT_FOUND, end_node);
-
-  // update candidate node to new value
-
-  // add new node
-
-  printf("Part name: %s\n", part_name);
-  // print_node(end_node);
+  add_node(part_name, value, end_node);
 }
 
 static int parse_recursive(string_t *string, node_t *node) {
