@@ -1,10 +1,10 @@
 CBUILD = -Wall -Wextra --std=c17 -O0
 
-all: main.c parser.c
-	clang $^ $(CBUILD) -o main -fsanitize=address -DDEBUG
+all: main.c src/parser.c
+	clang $^ $(CBUILD) -o main -fsanitize=address -DDEBUG -Iinc
 
-main: main.c parser.c
-	clang $^ $(CBUILD) -o main -fsanitize=address
+main: main.c src/parser.c
+	clang $^ $(CBUILD) -o main -fsanitize=address -Iinc
 
-.phony:
-	rm -f main
+clear:
+	@rm -f main
