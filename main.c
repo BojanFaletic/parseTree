@@ -18,7 +18,7 @@ int test_parse() {
   add_word(root_value, 1, root);
   node_t *tree = get_end_node(&root_value, root);
 
-  add_node("ab", 2, &tree);
+  add_node("ab", 2, tree);
   //add_node("cd", 3, tree);
   //add_node("ef", 7, tree);
 
@@ -57,8 +57,8 @@ int test_list(){
 
 int main() {
 
-  //test_parse();
+  test_parse();
   //test_add_word();
-  test_list();
+  //test_list();
   return 0;
 }

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "list.h"
 #include "parser.h"
 
 #define MIN(A, B) ((A < B) ? A : B)
@@ -23,12 +24,54 @@ static bool is_valid_node(string_t const *name, node_t const *node) {
   return true;
 }
 
-bool free_v2(parser_t **tree){
-  if (tree == NULL){
+void print_list(list_holder_t *list) {
+  while (list->next != NULL) {
+    node_t *nd = list->data;
+    printf("List msg: %s\n", (char *)nd->message.data);
+  }
+}
+
+void free_v3(parser_t *tree) {
+  list_holder_t *list = list_init();
+  size_t N = tree->size;
+
+  if (N == 0) {
+    free(tree);
+    return;
+  }
+
+  node_t *tmp = tree->node;
+  bool end = false;
+  while (!end) {
+    end = true;
+    for (size_t i = 0; i < N; i++) {
+      node_t *nd = &tmp[i];
+      if (nd->size != 0) {
+        tmp = nd->node;
+        N = nd->size;
+        end = false;
+        break;
+      }
+    }
+  }
+
+  print_list(list);
+
+  list_free(list);
+
+  printf("-Freeing: %s\n", tmp->message.data);
+  free(tmp);
+  printf("-Freeing: tree\n");
+
+  free(tree);
+}
+
+bool free_v2(parser_t **tree) {
+  if (tree == NULL) {
     return false;
   }
   node_t *parent = (*tree)->node;
-  if (parent == NULL){
+  if (parent == NULL) {
     free(*tree);
     *tree = NULL;
     printf("-Tree\n");
@@ -37,7 +80,7 @@ bool free_v2(parser_t **tree){
 
   node_t *child = parent->node;
 
-  if (child == NULL){
+  if (child == NULL) {
     printf("-Freeing: %s\n", parent->message.data);
     free(parent);
     printf("-Tree\n");
@@ -50,9 +93,9 @@ bool free_v2(parser_t **tree){
 
   bool found = false;
 start_search:
-  for (size_t n=0; n<child->size; n++){
+  for (size_t n = 0; n < child->size; n++) {
     node_t *tmp = child->node + n;
-    if (tmp != NULL){
+    if (tmp != NULL) {
       parent = child;
       child = tmp;
       found = true;
@@ -83,10 +126,13 @@ start_search:
 }
 
 void free_tree(parser_t *tree) {
-  while (free_v2(&tree)){
+  free_v3(tree);
+  /*
+  while (free_v2(&tree)) {
     printf(". ");
   }
   printf(" \n");
+  */
 }
 
 parser_t *init_tree() {
@@ -95,22 +141,23 @@ parser_t *init_tree() {
   return tree;
 }
 
-void link_node(node_t **parent, node_t *child){
-  node_t *current_nodes = *parent;
-  size_t const N = current_nodes->size;
+void link_node(node_t *parent, node_t *child) {
+  node_t *current_nodes = parent->node;
+  size_t const N = parent->size;
   size_t const N_new = N + 1;
 
-  printf("N: %zu\n", N);
-
   node_t *new_nodes = (node_t *)malloc(sizeof(node_t) * N_new);
-  memcpy(new_nodes, current_nodes, sizeof(node_t) * N);
+  for (size_t i = 0; i < N; i++) {
+    new_nodes[i] = current_nodes[i];
+  }
   new_nodes[N] = *child;
 
-  *parent = new_nodes;
+  parent->node = new_nodes;
+  parent->size = N_new;
   free(current_nodes);
 }
 
-void add_node(const char *name, int const value, node_t **node) {
+void add_node(const char *name, int const value, node_t *node) {
   node_t child = {
     .node = NULL,
     .size = 0,
@@ -179,8 +226,8 @@ void add_word(const char *name, int const value, parser_t *tree) {
   node_t *end_node = get_end_node(&part_name, tree);
   if (end_node == NULL) {
     printf("+Adding: %s\n", name);
-    node_t *nd = (node_t*)malloc(sizeof(node_t));
-    nd->message = (string_t){.data=(char*)name, .size=strlen(name)};
+    node_t *nd = (node_t *)malloc(sizeof(node_t));
+    nd->message = (string_t){.data = (char *)name, .size = strlen(name)};
     nd->node = NULL;
     nd->size = 0;
     nd->value = value;
@@ -208,22 +255,21 @@ void add_word(const char *name, int const value, parser_t *tree) {
   return;
 
   // merge current + candidate into new node
-  if (n_same_letters != 0){
+  if (n_same_letters != 0) {
     candidate->message.data += n_same_letters;
     candidate->message.size -= n_same_letters;
   }
 
   // add new intermediate node
-  const char* new_node_msg = part_name + n_same_letters;
-  add_node(new_node_msg, MSG_NOT_FOUND, &end_node);
-
+  const char *new_node_msg = part_name + n_same_letters;
+  add_node(new_node_msg, MSG_NOT_FOUND, end_node);
 
   // update candidate node to new value
 
   // add new node
 
   printf("Part name: %s\n", part_name);
-  //print_node(end_node);
+  // print_node(end_node);
 }
 
 static int parse_recursive(string_t *string, node_t *node) {
