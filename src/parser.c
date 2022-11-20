@@ -25,13 +25,13 @@ static bool is_valid_node(string_t const *name, node_t const *node) {
 }
 
 void print_list(list_holder_t *list) {
-  if (list == NULL){
+  if (list == NULL) {
     return;
   }
 
   while (list->next != NULL) {
     node_t *nd = list->data;
-    if (nd == NULL){
+    if (nd == NULL) {
       printf("Node corruption data is NULL\n");
       return;
     }
@@ -41,27 +41,27 @@ void print_list(list_holder_t *list) {
   }
 
   node_t *nd1 = list->data;
-  if (nd1 == NULL){
+  if (nd1 == NULL) {
     return;
   }
   printf("List msg: %s\n", (char *)nd1->message.data);
 }
 
-void map_all_nodes(node_t *nd, list_holder_t *list){
-  if (nd->size != 0){
+void map_all_nodes(node_t *nd, list_holder_t *list) {
+  if (nd->size != 0) {
     list_append(nd->node, list);
     printf("Adding: %zu\n", nd->size);
   }
 
-  for (size_t i=0; i<nd->size; i++){
+  for (size_t i = 0; i < nd->size; i++) {
     node_t *tmp = &nd->node[i];
     map_all_nodes(tmp, list);
   }
 }
 
-void free_all_nodes_in_list(list_holder_t *list){
+void free_all_nodes_in_list(list_holder_t *list) {
   find_end(&list);
-  while (list->prev != NULL){
+  while (list->prev != NULL) {
     node_t *nd = list->data;
     printf("-Free: %s\n", nd->message.data);
     free(nd);
@@ -78,12 +78,12 @@ void free_tree(parser_t *tree) {
   list_holder_t *list = list_init();
 
   // add first layer
-  if (tree->size != 0){
+  if (tree->size != 0) {
     list_append(tree->node, list);
   }
 
   // add first element of all next layers
-  for (size_t i=0; i<tree->size; i++){
+  for (size_t i = 0; i < tree->size; i++) {
     map_all_nodes(tree->node + i, list);
   }
   print_list(list);
@@ -114,12 +114,11 @@ void link_node(node_t *parent, node_t *child) {
 }
 
 void add_node(const char *name, int const value, node_t *node) {
-  node_t child = {
-    .node = NULL,
-    .size = 0,
-    .message= (string_t){.data=(char*)name, .size=strlen(name)},
-    .value = value
-    };
+  node_t child = {.node = NULL,
+                  .size = 0,
+                  .message =
+                      (string_t){.data = (char *)name, .size = strlen(name)},
+                  .value = value};
 
   link_node(node, &child);
   printf("+Adding: %s\n", name);
@@ -138,23 +137,22 @@ size_t n_common_letters(char *const name, node_t const *nd) {
 }
 
 node_t *get_end_node(char **name, parser_t *tree) {
-  // No previous node exist need to make new
   if (tree->size == 0) {
     return NULL;
   }
 
-  node_t *tmp = NULL;
-  for (size_t i=0; i<tree->size; i++){
-    node_t *tmp2 = &tree->node[i];
-    size_t n = n_common_letters(*name, tmp2);
-    if (n!= 0){
+  node_t *end = NULL;
+  for (size_t i = 0; i < tree->size; i++) {
+    node_t *tmp = &tree->node[i];
+    size_t n = n_common_letters(*name, tmp);
+    if (n != 0) {
       *name += n;
-      tmp = tmp2;
+      end = tmp;
       break;
     }
   }
 
-  if (tmp == NULL){
+  if (end == NULL) {
     return NULL;
   }
 
@@ -163,20 +161,20 @@ node_t *get_end_node(char **name, parser_t *tree) {
   bool keep_searching = true;
   while (keep_searching) {
     keep_searching = false;
-    for (size_t n = 0; n < tmp->size; n++) {
-      node_t *selected_nd = tmp->node + n;
+    for (size_t n = 0; n < end->size; n++) {
+      node_t *selected_nd = &end->node[n];
       if (is_valid_node(&string, selected_nd)) {
         string.size -= selected_nd->message.size;
         string.data += selected_nd->message.size;
 
-        tmp = selected_nd;
+        end = selected_nd;
         keep_searching = true;
         break;
       }
     }
   }
   *name = string.data;
-  return tmp;
+  return end;
 }
 
 void print_node(node_t *nd) {
@@ -190,18 +188,18 @@ void print_node(node_t *nd) {
          nd->value, nd->size, non_zero_sz);
 }
 
-
-
 void add_word(const char *name, int const value, parser_t *tree) {
   char *part_name = (char *)name;
   node_t *end_node = get_end_node(&part_name, tree);
   if (end_node == NULL) {
     printf("+Adding: %s\n", name);
     node_t *nd = (node_t *)malloc(sizeof(node_t));
-    nd->message = (string_t){.data = (char *)name, .size = strlen(name)};
-    nd->node = NULL;
-    nd->size = 0;
-    nd->value = value;
+    *nd = (node_t){
+      .node = NULL,
+      .size = 0,
+      .message = (string_t){.data = (char *)name, .size = strlen(name)},
+      .value = value
+    };
 
     tree->node = nd;
     tree->size = 1;
@@ -212,10 +210,6 @@ void add_word(const char *name, int const value, parser_t *tree) {
 }
 
 static int parse_recursive(string_t *string, node_t *node) {
-#if DEBUG2
-  printf("MSG: %s Nd: %s M_sz: %zu Nd_sz: %zu\n", string->data,
-         node->message.data, string->size, node->message.size);
-#endif
   if (is_valid_node(string, node)) {
     if (string->size == node->message.size) {
       return node->value;
