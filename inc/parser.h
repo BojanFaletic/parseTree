@@ -27,7 +27,7 @@ typedef struct parser_t{
 } parser_t;
 
 
-parser_t *init_tree();
+void init_tree(parser_t **tree);
 int parse(char const *name, parser_t *tree);
 void free_tree(parser_t *tree);
 

@@ -15,7 +15,8 @@ int check(const char *test, int expects, parser_t *root) {
 }
 
 int test_parse() {
-  parser_t *root = init_tree();
+  parser_t *root;
+  init_tree(&root);
 
   char *root_value = (char *)"He";
   add_word(root_value, 1, root);
@@ -42,7 +43,9 @@ int test_parse() {
 }
 
 int test_add_word() {
-  parser_t *root = init_tree();
+  parser_t *root;
+  init_tree(&root);
+
   add_word("H", 1, root);
   add_word("He", 2, root);
   add_word("Hel", 3, root);
@@ -59,7 +62,9 @@ int test_add_word() {
 }
 
 int test_add_word2() {
-  parser_t *root = init_tree();
+  parser_t *root;
+  init_tree(&root);
+
   add_word("Hello", 1, root);
   add_word("Hey", 2, root);
 
@@ -72,7 +77,9 @@ int test_add_word2() {
 }
 
 int test_add_word3() {
-  parser_t *root = init_tree();
+  parser_t *root;
+  init_tree(&root);
+
   add_word("Hello", 1, root);
   add_word("H", 2, root);
 

@@ -50,7 +50,9 @@ void print_list(list_holder_t *list) {
 void map_all_nodes(node_t *nd, list_holder_t *list) {
   if (nd->size != 0) {
     list_append(nd->node, list);
+#ifdef DEBUG
     printf("Adding: %zu\n", nd->size);
+#endif
   }
 
   for (size_t i = 0; i < nd->size; i++) {
@@ -63,14 +65,18 @@ void free_all_nodes_in_list(list_holder_t *list) {
   find_end(&list);
   while (list->prev != NULL) {
     node_t *nd = list->data;
+#ifdef DEBUG
     printf("-Free: %s\n", nd->message.data);
+#endif
     free(nd);
     list = list->prev;
   }
 
   // free last
   node_t *nd2 = list->data;
+#ifdef DEBUG
   printf("-Free: %s\n", nd2->message.data);
+#endif
   free(nd2);
 }
 
@@ -86,15 +92,16 @@ void free_tree(parser_t *tree) {
   for (size_t i = 0; i < tree->size; i++) {
     map_all_nodes(tree->node + i, list);
   }
+#ifdef DEBUG
   print_list(list);
+#endif
   free_all_nodes_in_list(list);
   list_free(list);
   free(tree);
 }
 
-parser_t *init_tree() {
-  parser_t *tree = (parser_t *)calloc(sizeof(parser_t), 1);
-  return tree;
+void init_tree(parser_t **tree){
+  *tree = (parser_t *)calloc(sizeof(parser_t), 1);
 }
 
 void link_node(node_t *parent, node_t *child) {
@@ -121,10 +128,12 @@ void add_node(const char *name, int const value, node_t *node) {
                   .value = value};
 
   link_node(node, &child);
+#ifdef DEBUG
   printf("+Adding: %s\n", name);
+#endif
 }
 
-size_t n_common_letters(const char * name, node_t const *nd) {
+size_t n_common_letters(const char *name, node_t const *nd) {
   size_t const max_search = MIN(strlen(name), nd->message.size);
   size_t i;
 
@@ -192,14 +201,15 @@ void add_word(const char *name, int const value, parser_t *tree) {
   char *part_name = (char *)name;
   node_t *end_node = get_end_node(&part_name, tree);
   if (end_node == NULL) {
+#ifdef DEBUG
     printf("+Adding: %s\n", name);
+#endif
     node_t *nd = (node_t *)malloc(sizeof(node_t));
-    *nd = (node_t){
-      .node = NULL,
-      .size = 0,
-      .message = (string_t){.data = (char *)name, .size = strlen(name)},
-      .value = value
-    };
+    *nd = (node_t){.node = NULL,
+                   .size = 0,
+                   .message =
+                       (string_t){.data = (char *)name, .size = strlen(name)},
+                   .value = value};
 
     tree->node = nd;
     tree->size = 1;
@@ -210,7 +220,7 @@ void add_word(const char *name, int const value, parser_t *tree) {
   size_t part_name_sz = strlen(part_name);
 
   // insert new intermediate node (Hello, Hey --> He, llo, y)
-  if (n_same != 0){
+  if (n_same != 0) {
     int value2 = end_node->value;
     node_t *next2 = end_node->node;
     size_t size2 = end_node->size;
@@ -227,7 +237,7 @@ void add_word(const char *name, int const value, parser_t *tree) {
     end_node->node[0].size = size2;
   }
 
-  if (part_name_sz != 0){
+  if (part_name_sz != 0) {
     add_node(part_name, value, end_node);
   }
 }
