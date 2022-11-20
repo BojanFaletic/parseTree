@@ -66,6 +66,18 @@ int test_add_word2(){
   return 0;
 }
 
+int test_add_word3(){
+  parser_t *root = init_tree();
+  add_word("Hello", 1, root);
+  add_word("H", 2, root);
+
+  check("Hello", root);
+  check("H", root);
+
+  free_tree(root);
+  return 0;
+}
+
 int test_list(){
   list_holder_t *list = list_init();
   list_append("Hello", list);
@@ -84,7 +96,8 @@ int main() {
 
   //test_parse();
   //test_add_word2();
-  test_add_word2();
+  //test_add_word2();
+  test_add_word3();
   //test_list();
   return 0;
 }

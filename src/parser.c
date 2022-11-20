@@ -207,6 +207,7 @@ void add_word(const char *name, int const value, parser_t *tree) {
   }
 
   size_t n_same = n_common_letters(name, end_node);
+  size_t part_name_sz = strlen(part_name);
 
   // insert new intermediate node (Hello, Hey --> He, llo, y)
   if (n_same != 0){
@@ -216,7 +217,7 @@ void add_word(const char *name, int const value, parser_t *tree) {
 
     // change current node
     end_node->message.size = n_same;
-    end_node->value = -1;
+    end_node->value = (part_name_sz == 0) ? value : -1;
     end_node->node = NULL;
     end_node->size = 0;
 
@@ -225,7 +226,10 @@ void add_word(const char *name, int const value, parser_t *tree) {
     end_node->node[0].node = next2;
     end_node->node[0].size = size2;
   }
-  add_node(part_name, value, end_node);
+
+  if (part_name_sz != 0){
+    add_node(part_name, value, end_node);
+  }
 }
 
 static int parse_recursive(string_t *string, node_t *node) {
