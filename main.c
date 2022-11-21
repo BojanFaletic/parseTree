@@ -1,6 +1,8 @@
 #include "parser.h"
 #include <stdio.h>
 
+
+
 void example(const char *word, parser_t *obj) {
   switch (parser_parse(word, obj)) {
   case 1:
