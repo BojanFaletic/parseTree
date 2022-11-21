@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: C/C++ CI build parseTree
 
 on:
   push:
@@ -13,5 +13,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: configure
+    - name: run_tests
       run: cd test && make && ./main
+    - name: static_check
+      run: cd test && make static
