@@ -3,6 +3,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define PARSER_MSG_NOT_FOUND -1
 #define PARSER_SUCCESS 0
 
@@ -35,3 +39,7 @@ void parser_add(const char *name, int const value, parser_t *tree);
 
 // return value for name, PARSER_MSG_NOT_FOUND if not found
 int parser_parse(char const *name, parser_t *tree);
+
+#ifdef __cplusplus
+}
+#endif

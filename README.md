@@ -20,3 +20,12 @@ This is still in development and not yet sufficiently tested for deploying in pr
 
   parser_free(root);
 ```
+
+## Benchmark
+
+Benchmark      | Time          | CPU        |Iterations
+ ---           | ---           | ---        | ---
+ParserParse    |   16.4 ns     |    16.4 ns |    42451456
+NaiveParse     |   14.9 ns     |    14.9 ns |    54427306
+
+Currently still slower then simple strcmp. Parser need to have better optimizations for desired performance.
