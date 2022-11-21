@@ -9,6 +9,9 @@ all: $(SRCS)
 release: $(SRCS)
 	clang $^ $(CBUILD) -O2 -o main $(INC)
 
+static: $(SRCS)
+	clang $^ $(CBUILD) -o main -fsanitize=address -Wpedantic -Werror $(INC)
+
 debug: $(SRCS)
 	clang $^ $(CBUILD) -o main -fsanitize=address -DPARSER_DEBUG $(INC)
 

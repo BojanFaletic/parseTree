@@ -15,5 +15,7 @@ jobs:
     - uses: actions/checkout@v3
     - name: run_tests
       run: cd test && make && ./main
-    - name: static_check
+    - name: static_check_test
       run: cd test && make static
+    - name: static_check_main
+      run: make static
