@@ -2,7 +2,7 @@
 #include "parser.h"
 #include <string.h>
 
-static void SingleParse(benchmark::State& state) {
+static void ParserParse(benchmark::State& state) {
   // Perform setup here
   // init parser object
   parser_t *root;
@@ -57,7 +57,7 @@ static void NaiveParse(benchmark::State& state) {
   }
 }
 // Register the function as a benchmark
-BENCHMARK(SingleParse);
+BENCHMARK(ParserParse);
 BENCHMARK(NaiveParse);
 
 // Run the benchmark
