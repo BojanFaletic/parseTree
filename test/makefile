@@ -11,5 +11,10 @@ static: $(SRCS)
 PARSER_DEBUG: $(SRCS)
 	clang $^ $(CBUILD) -o main -fsanitize=address -DPARSER_DEBUG $(INC)
 
+benchmark:
+	clang $(CBUILD) ../src/parser.c -I../inc -c
+	clang $(CBUILD) ../src/list.c -I../inc -c
+	clang++ benchmark.cpp parser.o list.o -I../inc --std=c++20 -isystem benchmark/include -lbenchmark -lpthread -o benchmark
+
 clear:
-	@rm -f main
+	@rm -f main benchmark *.o
