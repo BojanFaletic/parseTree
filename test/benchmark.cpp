@@ -21,6 +21,8 @@ static void SingleParse(benchmark::State& state) {
     // This code gets timed
     volatile int code = parser_parse(str, root);
   }
+
+  parser_free(root);
 }
 
 int test_naive(const char *st1){
