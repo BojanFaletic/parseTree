@@ -1,19 +1,20 @@
 name: C/C++ CI build parseTree
 
 on:
+  push:
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: run_tests
-      run: cd test && make && ./main
-    - name: static_check_test
-      run: cd test && make static
-    - name: static_check_main
-      run: make static
+      - uses: actions/checkout@v3
+      - name: run_tests
+        run: cd test && make && ./main
+      - name: static_check_test
+        run: cd test && make static
+      - name: static_check_main
+        run: make static
