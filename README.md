@@ -1,6 +1,8 @@
 ## Parser
 
 Efficient string decoding algorithm. It is implemented as parse tree with minimal memory allocations.
+This algorithm runs in linear time as function of input length. Naive searching would take N compares to all possible combinations,
+`parser` dynamically prune imposable strings thus reduce search time.
 
 ## Warning
 This is still in development and not yet sufficiently tested for deploying in production.

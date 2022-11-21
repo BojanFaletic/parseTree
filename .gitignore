@@ -3,3 +3,5 @@
 !*.c
 !*.h
 main
+benchmark
+*.o
