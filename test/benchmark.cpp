@@ -13,7 +13,7 @@ static void SingleParse(benchmark::State& state) {
 
   for (auto _ : state) {
     // This code gets timed
-    parser_parse("Hello", root);
+    volatile int code = parser_parse("Hello", root);
   }
 }
 // Register the function as a benchmark
