@@ -35,12 +35,17 @@ int main() {
   example(data4, root);
 #endif
 
+  if (0){
+    test_item("H", root);
+    test_item("He", root);
+    test_item("Hell", root);
+    test_item("Hello", root);
+    test_item("Wee", root);
+    test_item("W", root);
+  }
+
   test_item("H", root);
-  test_item("He", root);
-  test_item("Hell", root);
-  test_item("Hello", root);
-  test_item("World", root);
-  test_item("Wee", root);
+  test_item("H", root);
 
   // freeing object
   parser_free(root);

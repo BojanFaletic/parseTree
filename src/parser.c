@@ -232,9 +232,38 @@ void print_node(parser_node_t *nd) {
          nd->value, nd->size, non_zero_sz);
 }
 
+void insert_node(const char *full_name, int value, parser_node_t *nd){
+  size_t n_same = n_common_letters(full_name, nd);
+  const char *name = &full_name[n_same];
+  size_t name_sz = strlen(name);
+
+  int value2 = nd->value;
+  parser_node_t *next2 = nd->node;
+  size_t size2 = nd->size;
+
+  // change current node
+  nd->message.size = n_same;
+  nd->value = (name_sz == 0) ? value : -1;
+  nd->node = NULL;
+  nd->size = 0;
+
+  char *nd_name = &nd->message.data[n_same];
+  add_node(nd_name, value2, nd);
+
+  nd->node[0].node = next2;
+  nd->node[0].size = size2;
+}
+
 void parser_add(const char *name, int const value, parser_t *tree) {
   char *part_name = (char *)name;
   parser_node_t *end_node = get_end_node(&part_name, tree);
+  size_t part_name_size = strlen(part_name);
+  if (part_name_size == 0){
+    // replace node value because node already exists
+    end_node->value = value;
+    return;
+  }
+
   if (end_node == NULL) {
 #ifdef PARSER_DEBUG
     printf("+Adding: %s\n", name);
@@ -243,51 +272,22 @@ void parser_add(const char *name, int const value, parser_t *tree) {
     return;
   }
 
-  size_t n_same = n_common_letters(name, end_node);
-  size_t part_name_sz = strlen(part_name);
+  // insert new intermediate node:
+  // Hello, Hey --> He, llo, y
+  // Hey, Hello --> He, y, llo
+  // Hello, H --> H, ello
+  // H, Hello --> H, ello
 
-  // insert new intermediate node (Hello, Hey --> He, llo, y)
-  if (n_same != 0) {
-    // apply merge of node
-    if (end_node->message.size > strlen(name)) {
-      int value2 = end_node->value;
-      parser_node_t *next2 = end_node->node;
-      size_t size2 = end_node->size;
-
-      // change current node
-      end_node->message.size = n_same;
-      end_node->value = (part_name_sz == 0) ? value : -1;
-      end_node->node = NULL;
-      end_node->size = 0;
-
-      char *nd_name = &end_node->message.data[n_same];
-      add_node(nd_name, value2, end_node);
-      end_node->node[0].node = next2;
-      end_node->node[0].size = size2;
-    }
+  bool is_first_letter_same = name[0] == end_node->message.data[0];
+  bool is_name_shorter = strlen(name) <= end_node->message.size;
+  if (is_first_letter_same && is_name_shorter) {
+      insert_node(name, value, end_node);
   }
 
-  if (part_name_sz != 0) {
+  bool is_part_name_empty = part_name[0] == 0;
+  if (!is_part_name_empty) {
     add_node(part_name, value, end_node);
   }
-}
-
-static int parse_recursive(parser_string_t *string, parser_node_t *node) {
-  if (is_valid_node(string, node)) {
-    if (string->size == node->message.size) {
-      return node->value;
-    }
-    string->data += node->message.size;
-    string->size -= node->message.size;
-
-    for (size_t n = 0; n < node->size; n++) {
-      int value = parse_recursive(string, node->node + n);
-      if (value != PARSER_MSG_NOT_FOUND) {
-        return value;
-      }
-    }
-  }
-  return PARSER_MSG_NOT_FOUND;
 }
 
 int parser_parse(char const *name, parser_t *tree) {

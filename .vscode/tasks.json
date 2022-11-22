@@ -10,7 +10,6 @@
                 "-g",
                 "-DPARSER_DEBUG",
                 "main.c",
-                "test/tests.c",
                 "src/parser.c",
                 "src/list.c",
                 "-Iinc",
