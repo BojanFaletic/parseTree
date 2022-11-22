@@ -2,23 +2,7 @@
 #include <stdio.h>
 
 void example(const char *word, parser_t *obj) {
-  switch (parser_parse(word, obj)) {
-  case 1:
-    printf("Parser found: %d == %s\n", 1, word);
-    break;
-
-  case 2:
-    printf("Parser found: %d == %s\n", 2, word);
-    break;
-
-  case 3:
-    printf("Parser found: %d == %s\n", 3, word);
-    break;
-
-  default:
-    printf("Error unknown input: %s\n", word);
-    break;
-  }
+  printf("Parser value: %d == %s\n", parser_parse(word, obj), word);
 }
 
 void test_item(const char *name, parser_t *root) {
@@ -51,8 +35,12 @@ int main() {
   example(data4, root);
 #endif
 
-  test_item("Hello", root);
+  test_item("H", root);
+  test_item("He", root);
   test_item("Hell", root);
+  test_item("Hello", root);
+  test_item("World", root);
+  test_item("Wee", root);
 
   // freeing object
   parser_free(root);

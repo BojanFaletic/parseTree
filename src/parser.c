@@ -14,8 +14,7 @@ extern "C" {
 
 void print_node(parser_node_t *nd);
 
-static bool is_valid_node(parser_string_t const *name,
-                          parser_node_t const *node) {
+static bool is_valid_node(parser_string_t *name, parser_node_t *node) {
   parser_string_t const *node_v = &node->message;
 
   if (name->size < node_v->size) {
@@ -249,20 +248,23 @@ void parser_add(const char *name, int const value, parser_t *tree) {
 
   // insert new intermediate node (Hello, Hey --> He, llo, y)
   if (n_same != 0) {
-    int value2 = end_node->value;
-    parser_node_t *next2 = end_node->node;
-    size_t size2 = end_node->size;
+    // apply merge of node
+    if (end_node->message.size > strlen(name)) {
+      int value2 = end_node->value;
+      parser_node_t *next2 = end_node->node;
+      size_t size2 = end_node->size;
 
-    // change current node
-    end_node->message.size = n_same;
-    end_node->value = (part_name_sz == 0) ? value : -1;
-    end_node->node = NULL;
-    end_node->size = 0;
+      // change current node
+      end_node->message.size = n_same;
+      end_node->value = (part_name_sz == 0) ? value : -1;
+      end_node->node = NULL;
+      end_node->size = 0;
 
-    char *nd_name = &end_node->message.data[n_same];
-    add_node(nd_name, value2, end_node);
-    end_node->node[0].node = next2;
-    end_node->node[0].size = size2;
+      char *nd_name = &end_node->message.data[n_same];
+      add_node(nd_name, value2, end_node);
+      end_node->node[0].node = next2;
+      end_node->node[0].size = size2;
+    }
   }
 
   if (part_name_sz != 0) {
@@ -290,12 +292,34 @@ static int parse_recursive(parser_string_t *string, parser_node_t *node) {
 
 int parser_parse(char const *name, parser_t *tree) {
   parser_string_t string = {.data = (char *)name, .size = strlen(name)};
+  parser_node_t *nd = NULL;
+
   for (size_t n = 0; n < tree->size; n++) {
-    int status = parse_recursive(&string, tree->node + n);
-    if (status != PARSER_MSG_NOT_FOUND) {
-      return status;
+    parser_node_t *tmp = &tree->node[n];
+    if (is_valid_node(&string, tmp)) {
+      nd = tmp;
+      break;
     }
   }
+  if (nd == NULL) {
+    return PARSER_MSG_NOT_FOUND;
+  }
+
+keep_searching:
+  string.data += nd->message.size;
+  string.size -= nd->message.size;
+  if (string.size == 0){
+    return nd->value;
+  }
+
+  for (size_t n = 0; n < nd->size; n++) {
+    parser_node_t *tmp = &nd->node[n];
+    if (is_valid_node(&string, tmp)){
+      nd = tmp;
+      goto keep_searching;
+    }
+  }
+
   return PARSER_MSG_NOT_FOUND;
 }
 
