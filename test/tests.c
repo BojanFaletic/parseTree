@@ -92,7 +92,9 @@ int test_add_random() {
 }
 
 int test_list() {
-  list_holder_t *list = list_init();
+  list_holder_t *list;
+  list_init(&list);
+
   list_append("Hello", list);
   list_append("World", list);
 

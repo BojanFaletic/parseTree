@@ -40,7 +40,8 @@ static parser_node_t *get_end_node(char **name, parser_t *tree);
 ///////////////////////////////////////////////////////////////////////////////
 
 void parser_free(parser_t *tree) {
-  list_holder_t *list = list_init();
+  list_holder_t *list;
+  list_init(&list);
 
   // add first layer
   if (tree->size != 0) {
@@ -91,7 +92,9 @@ void parser_add(const char *name, int const value, parser_t *tree) {
   parser_node_t *end_node = get_end_node(&part_name, tree);
   size_t part_name_size = strlen(part_name);
   if (part_name_size == 0) {
-    // replace node value because node already exists
+#ifdef PARSER_DEBUG
+    printf("Warning: %s already exists!, overriding value\n", name);
+#endif
     end_node->value = value;
     return;
   }
@@ -103,12 +106,6 @@ void parser_add(const char *name, int const value, parser_t *tree) {
     add_root_node(name, value, tree);
     return;
   }
-
-  // insert new intermediate node:
-  // Hello, Hey --> He, llo, y
-  // Hey, Hello --> He, y, llo
-  // Hello, H --> H, ello
-  // H, Hello --> H, ello
 
   bool is_first_letter_same = name[0] == end_node->message.data[0];
   bool is_name_shorter = strlen(name) <= end_node->message.size;
@@ -188,7 +185,7 @@ static void map_all_nodes(parser_node_t *nd, list_holder_t *list) {
 }
 
 static void free_all_nodes_in_list(list_holder_t *list) {
-  find_end(&list);
+  list_end(&list);
   while (list->prev != NULL) {
     parser_node_t *nd = list->data;
 #ifdef PARSER_DEBUG
