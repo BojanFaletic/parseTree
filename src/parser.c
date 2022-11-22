@@ -250,8 +250,9 @@ void insert_node(const char *full_name, int value, parser_node_t *nd){
   char *nd_name = &nd->message.data[n_same];
   add_node(nd_name, value2, nd);
 
-  nd->node[0].node = next2;
-  nd->node[0].size = size2;
+  size_t id = nd->size - 1;
+  nd->node[id].node = next2;
+  nd->node[id].size = size2;
 }
 
 void parser_add(const char *name, int const value, parser_t *tree) {
