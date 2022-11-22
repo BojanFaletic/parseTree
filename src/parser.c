@@ -23,6 +23,8 @@ static void print_node(parser_node_t *nd);
 #endif
 
 // Utility
+static void make_empty_node(const char *name, int const value,
+                            parser_node_t *child);
 static bool is_valid_node(parser_string_t *name, parser_node_t *node);
 static void map_all_nodes(parser_node_t *nd, list_holder_t *list);
 static void free_all_nodes_in_list(list_holder_t *list);
@@ -125,9 +127,9 @@ int parser_parse(char const *name, parser_t *tree) {
   parser_node_t *nd = NULL;
 
   for (size_t n = 0; n < tree->size; n++) {
-    parser_node_t *tmp = &tree->node[n];
-    if (is_valid_node(&string, tmp)) {
-      nd = tmp;
+    parser_node_t *candidate = &tree->node[n];
+    if (is_valid_node(&string, candidate)) {
+      nd = candidate;
       break;
     }
   }
@@ -143,9 +145,9 @@ keep_searching:
   }
 
   for (size_t n = 0; n < nd->size; n++) {
-    parser_node_t *tmp = &nd->node[n];
-    if (is_valid_node(&string, tmp)) {
-      nd = tmp;
+    parser_node_t *candidate = &nd->node[n];
+    if (is_valid_node(&string, candidate)) {
+      nd = candidate;
       goto keep_searching;
     }
   }
@@ -180,8 +182,8 @@ static void map_all_nodes(parser_node_t *nd, list_holder_t *list) {
   }
 
   for (size_t i = 0; i < nd->size; i++) {
-    parser_node_t *tmp = &nd->node[i];
-    map_all_nodes(tmp, list);
+    parser_node_t *candidate = &nd->node[i];
+    map_all_nodes(candidate, list);
   }
 }
 
@@ -221,6 +223,15 @@ static void link_node(parser_node_t *parent, parser_node_t *child) {
   free(current_nodes);
 }
 
+static void make_empty_node(const char *name, int const value,
+                            parser_node_t *child) {
+  *child = (parser_node_t){
+      .node = NULL,
+      .size = 0,
+      .message = (parser_string_t){.data = (char *)name, .size = strlen(name)},
+      .value = value};
+}
+
 static void link_root_node(parser_t *parent, parser_node_t *child) {
   parser_node_t *current_nodes = parent->node;
   size_t const N = parent->size;
@@ -239,12 +250,8 @@ static void link_root_node(parser_t *parent, parser_node_t *child) {
 }
 
 static void add_node(const char *name, int const value, parser_node_t *node) {
-  parser_node_t child = {
-      .node = NULL,
-      .size = 0,
-      .message = (parser_string_t){.data = (char *)name, .size = strlen(name)},
-      .value = value};
-
+  parser_node_t child;
+  make_empty_node(name, value, &child);
   link_node(node, &child);
 #ifdef PARSER_DEBUG
   printf("+Adding: %s\n", name);
@@ -252,12 +259,8 @@ static void add_node(const char *name, int const value, parser_node_t *node) {
 }
 
 static void add_root_node(const char *name, int const value, parser_t *node) {
-  parser_node_t child = {
-      .node = NULL,
-      .size = 0,
-      .message = (parser_string_t){.data = (char *)name, .size = strlen(name)},
-      .value = value};
-
+  parser_node_t child;
+  make_empty_node(name, value, &child);
   link_root_node(node, &child);
 #ifdef PARSER_DEBUG
   printf("+Adding: %s\n", name);
@@ -283,11 +286,11 @@ static parser_node_t *get_end_node(char **name, parser_t *tree) {
 
   parser_node_t *end = NULL;
   for (size_t i = 0; i < tree->size; i++) {
-    parser_node_t *tmp = &tree->node[i];
-    size_t n = n_common_letters(*name, tmp);
-    if (n == tmp->message.size) {
+    parser_node_t *candidate = &tree->node[i];
+    size_t n = n_common_letters(*name, candidate);
+    if (n == candidate->message.size) {
       *name += n;
-      end = tmp;
+      end = candidate;
       break;
     }
   }
@@ -298,19 +301,15 @@ static parser_node_t *get_end_node(char **name, parser_t *tree) {
 
   parser_string_t string = {.data = (char *)*name, .size = strlen(*name)};
 
-  bool keep_searching = true;
-  while (keep_searching) {
-    keep_searching = false;
-    for (size_t n = 0; n < end->size; n++) {
-      parser_node_t *selected_nd = &end->node[n];
-      if (is_valid_node(&string, selected_nd)) {
-        string.size -= selected_nd->message.size;
-        string.data += selected_nd->message.size;
+keep_searching:
+  for (size_t n = 0; n < end->size; n++) {
+    parser_node_t *candidate = &end->node[n];
+    if (is_valid_node(&string, candidate)) {
+      string.size -= candidate->message.size;
+      string.data += candidate->message.size;
 
-        end = selected_nd;
-        keep_searching = true;
-        break;
-      }
+      end = candidate;
+      goto keep_searching;
     }
   }
   *name = string.data;
