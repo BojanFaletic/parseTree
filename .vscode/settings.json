@@ -10,6 +10,9 @@
         "--std=c17"
     ],
     "files.associations": {
-        "export": "c"
+        "export": "c",
+        "array": "c",
+        "string": "c",
+        "string_view": "c"
     }
 }

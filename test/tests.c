@@ -8,7 +8,7 @@
 int check(const char *test, int expects, parser_t *root) {
   int status = parser_parse(test, root);
   if (status != expects) {
-    printf("Testing failed: %s: %d\n", test, status);
+    printf("Testing failed: %s: %d != %d\n", test, status, expects);
     return PARSER_MSG_NOT_FOUND;
   }
   return PARSER_SUCCESS;
@@ -63,8 +63,38 @@ int test_parser_add3() {
   return status;
 }
 
+int test_item(const char *name, parser_t *nd) {
+  static int id = 0;
+  parser_add(name, ++id, nd);
+  return check(name, id, nd);
+}
+
+int test_add_random() {
+  parser_t *root;
+  parser_init(&root);
+
+  int status = PARSER_SUCCESS;
+
+  status |= test_item("H", root);
+  status |= test_item("He", root);
+  status |= test_item("Hell", root);
+  status |= test_item("Hello", root);
+  status |= test_item("Wee", root);
+  status |= test_item("W", root);
+
+  status |= test_item("He", root);
+  status |= test_item("Hi", root);
+  status |= test_item("Hj", root);
+  status |= test_item("Hjcc", root);
+
+  parser_free(root);
+  return status;
+}
+
 int test_list() {
-  list_holder_t *list = list_init();
+  list_holder_t *list;
+  list_init(&list);
+
   list_append("Hello", list);
   list_append("World", list);
 
@@ -83,6 +113,7 @@ int test_parser() {
   status |= test_parser_add();
   status |= test_parser_add2();
   status |= test_parser_add3();
+  status |= test_add_random();
 
   return status;
 }
