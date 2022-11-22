@@ -44,8 +44,13 @@ int main() {
     test_item("W", root);
   }
 
-  test_item("H", root);
-  test_item("H", root);
+  if (0){
+    test_item("H", root);
+    test_item("H", root);
+  }
+
+  test_item("Wee", root);
+  test_item("W", root);
 
   // freeing object
   parser_free(root);

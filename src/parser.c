@@ -189,7 +189,7 @@ parser_node_t *get_end_node(char **name, parser_t *tree) {
   for (size_t i = 0; i < tree->size; i++) {
     parser_node_t *tmp = &tree->node[i];
     size_t n = n_common_letters(*name, tmp);
-    if (n != 0) {
+    if (n == tmp->message.size) {
       *name += n;
       end = tmp;
       break;
