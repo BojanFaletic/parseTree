@@ -126,6 +126,23 @@ void link_node(parser_node_t *parent, parser_node_t *child) {
   free(current_nodes);
 }
 
+void link_root_node(parser_t *parent, parser_node_t *child) {
+  parser_node_t *current_nodes = parent->node;
+  size_t const N = parent->size;
+  size_t const N_new = N + 1;
+
+  parser_node_t *new_nodes =
+      (parser_node_t *)malloc(sizeof(parser_node_t) * N_new);
+  for (size_t i = 0; i < N; i++) {
+    new_nodes[i] = current_nodes[i];
+  }
+  new_nodes[N] = *child;
+
+  parent->node = new_nodes;
+  parent->size = N_new;
+  free(current_nodes);
+}
+
 void add_node(const char *name, int const value, parser_node_t *node) {
   parser_node_t child = {
       .node = NULL,
@@ -134,6 +151,19 @@ void add_node(const char *name, int const value, parser_node_t *node) {
       .value = value};
 
   link_node(node, &child);
+#ifdef PARSER_DEBUG
+  printf("+Adding: %s\n", name);
+#endif
+}
+
+void add_root_node(const char *name, int const value, parser_t *node) {
+  parser_node_t child = {
+      .node = NULL,
+      .size = 0,
+      .message = (parser_string_t){.data = (char *)name, .size = strlen(name)},
+      .value = value};
+
+  link_root_node(node, &child);
 #ifdef PARSER_DEBUG
   printf("+Adding: %s\n", name);
 #endif
@@ -210,15 +240,7 @@ void parser_add(const char *name, int const value, parser_t *tree) {
 #ifdef PARSER_DEBUG
     printf("+Adding: %s\n", name);
 #endif
-    parser_node_t *nd = (parser_node_t *)malloc(sizeof(parser_node_t));
-    *nd = (parser_node_t){.node = NULL,
-                          .size = 0,
-                          .message = (parser_string_t){.data = (char *)name,
-                                                       .size = strlen(name)},
-                          .value = value};
-
-    tree->node = nd;
-    tree->size = 1;
+    add_root_node(name, value, tree);
     return;
   }
 
