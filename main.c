@@ -37,14 +37,14 @@ int main() {
   example(data4, root);
 #endif
 
-  list_holder_t *list;
-  load_json("input_data.json", root, &list);
+  json_obj_t *list;
+  parser_load_json("input_data.json", root, &list);
 
   example("Hello",  root);
 
   // freeing object
   parser_free(root);
-  json_free(list);
+  parser_free_json(list);
 
   return 0;
 }

@@ -6,7 +6,7 @@
 
 #define MAX_STRING_SIZE 10
 
-void load_json(const char *f_name, parser_t *obj, list_holder_t **json) {
+void parser_load_json(const char *f_name, parser_t *obj, json_obj_t **json){
   FILE *ptr = fopen(f_name, "r");
   if (ptr == NULL) {
     printf("File cannot be opened\n");
@@ -100,7 +100,7 @@ void load_json(const char *f_name, parser_t *obj, list_holder_t **json) {
   fclose(ptr);
 }
 
-void json_free(list_holder_t *json) {
+void parser_free_json(json_obj_t *json){
   list_end(&json);
   while (json->prev != NULL) {
     char *data = json->data;
