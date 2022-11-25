@@ -16,7 +16,7 @@ extern "C" {
 // Static function prototypes
 ///////////////////////////////////////////////////////////////////////////////
 
-#if DEBUG
+#if PARSER_DEBUG
 // Debug
 static void print_list(list_holder_t *list);
 static void print_node(parser_node_t *nd);
@@ -316,7 +316,7 @@ keep_searching:
 ///////////////////////////////////////////////////////////////////////////////
 // Debug Functions
 ///////////////////////////////////////////////////////////////////////////////
-#if DEBUG
+#if PARSER_DEBUG
 static void print_list(list_holder_t *list) {
   if (list == NULL) {
     return;
