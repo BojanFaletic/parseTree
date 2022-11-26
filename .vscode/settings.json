@@ -14,7 +14,9 @@
     "array": "c",
     "string": "c",
     "string_view": "c",
-    "list": "c"
+    "list": "c",
+    "cstring": "c",
+    "*.ipp": "c"
   },
   "C_Cpp.default.includePath": [
     "inc"

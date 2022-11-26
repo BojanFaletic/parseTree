@@ -38,9 +38,9 @@ int main() {
 #endif
 
   json_obj_t *list;
-  parser_load_json("input_data.json", root, &list);
+  parser_load_json("test/test_out.json", root, &list);
 
-  example("Hello",  root);
+  example("UCXWB",  root);
 
   // freeing object
   parser_free(root);
