@@ -6,10 +6,6 @@
 #include "list.h"
 #include "parser.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define MIN(A, B) ((A < B) ? A : B)
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -349,9 +345,5 @@ static void print_node(parser_node_t *nd) {
   }
   printf("Nd: %s, value: %d, next sz: %zu, alloc sz: %zu\n", nd->message.data,
          nd->value, nd->size, non_zero_sz);
-}
-#endif
-
-#ifdef __cplusplus
 }
 #endif

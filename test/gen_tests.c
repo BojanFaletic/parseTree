@@ -6,7 +6,7 @@
 #define MIN_NAME_LEN 5
 #define MAX_NAME_LEN 10
 
-#define JSON_ENTRIES 100000
+#define JSON_ENTRIES 10000
 
 typedef struct{
     char* name;
@@ -57,7 +57,7 @@ void free_entry(json_dict_t *j){
     free(j->name);
 }
 
-int main(){
+int main(int argc, char **argv){
     size_t seed = 42; // time(0)
     srand(seed);
 

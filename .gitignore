@@ -7,3 +7,4 @@ benchmark
 *.o
 test/*.json
 test/gen_tests
+test/test
