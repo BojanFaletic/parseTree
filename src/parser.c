@@ -133,6 +133,10 @@ void parser_add(const char *name, int const value, parser_t *tree) {
     // update value of node
     end_node->value = value;
   }
+  else if (action == 5){
+    // normal adding of node
+    add_node(part_name, value, end_node);
+  }
 }
 
 int parser_parse(char const *name, parser_t *tree) {
@@ -318,7 +322,7 @@ static parser_node_t *get_end_node(char **name, parser_t *tree, int *action) {
   size_t tmp_sz = tree->size;
   parser_node_t *end_nd = (tmp_sz != 0) ? tree->node : NULL;
 
-  *action = 0;
+  *action = 5;
 keep_searching:
   for (size_t i = 0; i < tmp_sz; i++) {
     parser_node_t *candidate = &end_nd[i];
@@ -333,7 +337,7 @@ keep_searching:
         name_sz -= node_sz;
 
         tmp_sz = candidate->size;
-        end_nd = candidate->node;
+        end_nd = candidate;
         goto keep_searching;
       } else {
         *action = status;

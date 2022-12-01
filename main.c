@@ -41,6 +41,7 @@ int main() {
   parser_load_json("test_cases/add_new.json", root, &list);
 
   example("WMK",  root);
+  example("WM",  root);
 
   // freeing object
   parser_free(root);
