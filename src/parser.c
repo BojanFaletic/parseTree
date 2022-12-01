@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,6 +8,19 @@
 #include "parser.h"
 
 #define MIN(A, B) ((A < B) ? A : B)
+
+///////////////////////////////////////////////////////////////////////////////
+// Misc types
+///////////////////////////////////////////////////////////////////////////////
+typedef enum {
+  unkown_e,            // error
+  add_root_e,          // normal adding node at start of tree
+  add_node_e,          // normal adding node at end of tree
+  assign_existing_e,   // if partial node already exists, assign value
+  insert_chain_node_e, // node with longer name exists, break, insert, append
+  insert_branch_e // node with start of name already exists, but full name is
+                  // does not match
+} end_node_ret_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Static function prototypes
@@ -29,7 +43,8 @@ static void link_root_node(parser_t *parent, parser_node_t *child);
 static void add_node(const char *name, int const value, parser_node_t *node);
 static void add_root_node(const char *name, int const value, parser_t *node);
 static size_t n_common_letters(const char *name, parser_node_t const *nd);
-static int get_end_node(char **name, parser_t *tree, parser_node_t **end);
+static end_node_ret_t get_end_node(char **name, parser_t *tree,
+                                   parser_node_t **end);
 ///////////////////////////////////////////////////////////////////////////////
 // Parser Functions
 ///////////////////////////////////////////////////////////////////////////////
@@ -86,42 +101,28 @@ void insert_node(const char *full_name, int value, parser_node_t *nd) {
 void parser_add(const char *name, int const value, parser_t *tree) {
   char *part_name = (char *)name;
   parser_node_t *end_node;
-  int end_nd_status = get_end_node(&part_name, tree, &end_node);
+  end_node_ret_t end_nd_status = get_end_node(&part_name, tree, &end_node);
   size_t part_name_size = strlen(part_name);
 
   switch (end_nd_status) {
-  case 0:
-    // insert node at the end
+  case add_root_e:
+    assert(false && "add_root_e not impl");
     break;
-  case 1:
-    /* code */
+  case add_node_e:
+    assert(false && "add_node_e not impl");
     break;
-  case 2:
-    // node already exists assign new value
-    if (part_name_size == 0) {
-#ifdef PARSER_DEBUG
-      printf("Warning: %s already exists!, overriding value\n", name);
-#endif
-      end_node->value = value;
-      return;
-    }
-
+  case assign_existing_e:
+    assert(false && "assign_existing_e not impl");
     break;
-
-  case 3:
-    // insert root node
-#ifdef PARSER_DEBUG
-    printf("+Adding: %s\n", name);
-#endif
-    add_root_node(name, value, tree);
+  case insert_chain_node_e:
+    assert(false && "insert_chain_node_e not impl");
     break;
-
-  case 4:
-    // split old node, create new node, assign its value
-    insert_node(name, value, end_node);
+  case insert_branch_e:
+    assert(false && "insert_branch_e not impl");
     break;
 
   default:
+    printf("Error node unable to decode\n");
     break;
   }
 }
@@ -284,54 +285,38 @@ static size_t n_common_letters(const char *name, parser_node_t const *nd) {
   return i;
 }
 
-static int get_end_node(char **name, parser_t *tree, parser_node_t **end) {
+static end_node_ret_t get_end_node(char **name, parser_t *tree,
+                                   parser_node_t **end) {
   size_t name_sz = strlen(*name);
   size_t tmp_sz = tree->size;
   parser_node_t *tmp_nd = tree->node;
-  int return_code = 3;
+  end_node_ret_t return_code = add_root_e;
 
-  bool found_node = false;
 keep_searching:
   for (size_t i = 0; i < tmp_sz; i++) {
     parser_node_t *candidate = &tmp_nd[i];
+    size_t node_sz = candidate->message.size;
     size_t n = n_common_letters(*name, candidate);
-    if (n == candidate->message.size && name_sz <= candidate->message.size) {
-      // partial node already exists, but has no value
-      *name += n;
-      found_node = true;
-      tmp_nd = candidate;
 
-      return_code = 2;
-      break;
-    if (n != candidate->message.size && name_sz <= candidate->message.size){
-      // partial node does not already exist need to insert node
-      *name += n;
-      found_node = true;
-      tmp_nd = candidate;
-      return_code = 4;
-      break;
-    }
-    } else if (n == candidate->message.size) {
-      // name_sz is still larger than node size, continue searching
+    // keep searching
+    if (name_sz > node_sz && n == node_sz) {
       *name += n;
       name_sz -= n;
 
-      tmp_nd = candidate;
+      tmp_nd = candidate->node;
       tmp_sz = candidate->size;
-      found_node = true;
-      return_code = 0;
       goto keep_searching;
-    } else if (n != 0) {
-      // found some partial matching with two nodes, but no exact solution
-      *name += n;
+    }
+
+    // check if assign value
+    if (name_sz == 0) {
       tmp_nd = candidate;
-      found_node = true;
-      return_code = 1;
+      return_code = assign_existing_e;
       break;
     }
   }
 
-  *end = (found_node) ? tmp_nd : NULL;
+  *end = tmp_nd;
   return return_code;
 }
 

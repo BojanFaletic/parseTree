@@ -38,7 +38,7 @@ int main() {
 #endif
 
   json_obj_t *list;
-  parser_load_json("test/out.json", root, &list);
+  parser_load_json("test_cases/add_new.json", root, &list);
 
   parser_node_t nodes[root->size];
   for (size_t i=0; i<root->size; i++){
