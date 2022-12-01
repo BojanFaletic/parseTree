@@ -38,15 +38,11 @@ int main() {
 #endif
 
   json_obj_t *list;
-  parser_load_json("test_cases/add_new.json", root, &list);
+  parser_load_json("test_cases/assign.json", root, &list);
 
+  example("WQK",  root);
   example("WM",  root);
-  example("WMK",  root);
-  example("WMU",  root);
-  example("WMA",  root);
-  example("WMAA",  root);
-  example("WMAB",  root);
-  example("WMABC",  root);
+  example("W",  root);
 
   // freeing object
   parser_free(root);
