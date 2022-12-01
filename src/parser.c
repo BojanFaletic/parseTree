@@ -10,19 +10,6 @@
 #define MIN(A, B) ((A < B) ? A : B)
 
 ///////////////////////////////////////////////////////////////////////////////
-// Misc types
-///////////////////////////////////////////////////////////////////////////////
-typedef enum {
-  unkown_e,            // error
-  add_root_e,          // normal adding node at start of tree
-  add_node_e,          // normal adding node at end of tree
-  assign_existing_e,   // if partial node already exists, assign value
-  insert_chain_node_e, // node with longer name exists, break, insert, append
-  insert_branch_e // node with start of name already exists, but full name is
-                  // does not match
-} end_node_ret_t;
-
-///////////////////////////////////////////////////////////////////////////////
 // Static function prototypes
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -43,8 +30,7 @@ static void link_root_node(parser_t *parent, parser_node_t *child);
 static void add_node(const char *name, int const value, parser_node_t *node);
 static void add_root_node(const char *name, int const value, parser_t *node);
 static size_t n_common_letters(const char *name, parser_node_t const *nd);
-static end_node_ret_t get_end_node(char **name, parser_t *tree,
-                                   parser_node_t **end);
+static parser_node_t *get_end_node(char **name, parser_t *tree, int *action);
 ///////////////////////////////////////////////////////////////////////////////
 // Parser Functions
 ///////////////////////////////////////////////////////////////////////////////
@@ -100,10 +86,22 @@ void insert_node(const char *full_name, int value, parser_node_t *nd) {
 
 void parser_add(const char *name, int const value, parser_t *tree) {
   char *part_name = (char *)name;
-  parser_node_t *end_node;
-  end_node_ret_t end_nd_status = get_end_node(&part_name, tree, &end_node);
+  int action;
+  parser_node_t *end_node = get_end_node(&part_name, tree, &action);
   size_t part_name_size = strlen(part_name);
 
+  printf("----------\n");
+  printf("node_addr: %p\n", end_node);
+  printf("name: %s\n", part_name);
+  printf("action: %d\n", action);
+
+  printf("----------\n");
+
+  if (end_node == NULL){
+    add_root_node(name, value, tree);
+  }
+
+#if 0
   switch (end_nd_status) {
   case add_root_e:
     add_root_node(name, value, tree);
@@ -126,6 +124,7 @@ void parser_add(const char *name, int const value, parser_t *tree) {
     exit(1);
     break;
   }
+#endif
 }
 
 int parser_parse(char const *name, parser_t *tree) {
@@ -286,44 +285,56 @@ static size_t n_common_letters(const char *name, parser_node_t const *nd) {
   return i;
 }
 
-static end_node_ret_t get_end_node(char **name, parser_t *tree,
-                                   parser_node_t **end) {
+int get_node_type(size_t n, size_t name_sz, size_t node_sz){
+  if (name_sz == 0){
+    return 1; // update just value
+  }
+
+  size_t max_search = MIN(name_sz, node_sz);
+  if (n == max_search){
+    if (name_sz >= node_sz){
+      return 2; // keep searching
+    }
+    if (name_sz < node_sz){
+      return 3; // insert node in chain
+    }
+  }
+  if (n < max_search){
+    return 4; // insert node and branch
+  }
+  return 0; // do nothing
+}
+
+static parser_node_t *get_end_node(char **name, parser_t *tree, int *action) {
   size_t name_sz = strlen(*name);
   size_t tmp_sz = tree->size;
-  parser_node_t *tmp_nd = tree->node;
-  end_node_ret_t return_code = add_root_e;
+  parser_node_t *end_nd = (tmp_sz != 0) ? tree->node : NULL;
 
-  bool found_node = false;
-
+  *action = 0;
 keep_searching:
   for (size_t i = 0; i < tmp_sz; i++) {
-    parser_node_t *candidate = &tmp_nd[i];
+    parser_node_t *candidate = &end_nd[i];
     size_t node_sz = candidate->message.size;
     size_t n = n_common_letters(*name, candidate);
 
-    // keep searching condition
-    if (node_sz < name_sz && n == node_sz){
-      *name += node_sz;
-      name_sz -= node_sz;
+    int status = get_node_type(n, name_sz, node_sz);
 
-      tmp_sz = candidate->size;
-      tmp_nd = candidate->node;
-      found_node = true;
+    if (status != 0){
+      if (status == 2){
+        *name += node_sz;
+        name_sz -= node_sz;
 
-      goto keep_searching;
-    }
-
-    // found partial match
-    if (n < node_sz){
-      tmp_nd = candidate->node;
-      return_code = insert_branch_e;
-      break;
+        tmp_sz = candidate->size;
+        end_nd = candidate->node;
+        goto keep_searching;
+      }
+      else{
+        *action = status;
+        break;
+      }
     }
   }
-
-
-  *end = (found_node) ? tmp_nd : NULL;
-  return return_code;
+  return end_nd;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
