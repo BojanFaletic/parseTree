@@ -106,7 +106,7 @@ void parser_add(const char *name, int const value, parser_t *tree) {
 
   switch (end_nd_status) {
   case add_root_e:
-    assert(false && "add_root_e not impl");
+    add_root_node(name, value, tree);
     break;
   case add_node_e:
     assert(false && "add_node_e not impl");
@@ -290,7 +290,9 @@ static end_node_ret_t get_end_node(char **name, parser_t *tree,
   size_t name_sz = strlen(*name);
   size_t tmp_sz = tree->size;
   parser_node_t *tmp_nd = tree->node;
-  end_node_ret_t return_code = add_root_e;
+  end_node_ret_t return_code = unkown_e;
+
+  bool found_node = false;
 
 keep_searching:
   for (size_t i = 0; i < tmp_sz; i++) {
@@ -298,22 +300,14 @@ keep_searching:
     size_t node_sz = candidate->message.size;
     size_t n = n_common_letters(*name, candidate);
 
-    // keep searching
-    if (name_sz > node_sz && n == node_sz) {
-      *name += n;
-      name_sz -= n;
-
-      tmp_nd = candidate->node;
-      tmp_sz = candidate->size;
-      goto keep_searching;
+    if (n == node_sz && name_sz == node_sz){
+      found_node = true;
     }
 
-    // check if assign value
-    if (name_sz == 0) {
-      tmp_nd = candidate;
-      return_code = assign_existing_e;
-      break;
-    }
+  }
+
+  if (!found_node){
+    return_code = add_root_e;
   }
 
   *end = tmp_nd;
