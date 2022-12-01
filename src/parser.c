@@ -123,6 +123,7 @@ void parser_add(const char *name, int const value, parser_t *tree) {
 
   default:
     printf("Error node unable to decode\n");
+    exit(1);
     break;
   }
 }
@@ -290,7 +291,7 @@ static end_node_ret_t get_end_node(char **name, parser_t *tree,
   size_t name_sz = strlen(*name);
   size_t tmp_sz = tree->size;
   parser_node_t *tmp_nd = tree->node;
-  end_node_ret_t return_code = unkown_e;
+  end_node_ret_t return_code = add_root_e;
 
   bool found_node = false;
 
@@ -300,17 +301,28 @@ keep_searching:
     size_t node_sz = candidate->message.size;
     size_t n = n_common_letters(*name, candidate);
 
-    if (n == node_sz && name_sz == node_sz){
+    // keep searching condition
+    if (node_sz < name_sz && n == node_sz){
+      *name += node_sz;
+      name_sz -= node_sz;
+
+      tmp_sz = candidate->size;
+      tmp_nd = candidate->node;
       found_node = true;
+
+      goto keep_searching;
     }
 
+    // found partial match
+    if (n < node_sz){
+      tmp_nd = candidate->node;
+      return_code = insert_branch_e;
+      break;
+    }
   }
 
-  if (!found_node){
-    return_code = add_root_e;
-  }
 
-  *end = tmp_nd;
+  *end = (found_node) ? tmp_nd : NULL;
   return return_code;
 }
 
