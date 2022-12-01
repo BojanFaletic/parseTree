@@ -10,13 +10,16 @@
     "--std=c17"
   ],
   "files.associations": {
+    "*.cshtml": "html",
     "export": "c",
     "array": "c",
     "string": "c",
     "string_view": "c",
     "list": "c",
     "cstring": "c",
-    "*.ipp": "c"
+    "*.ipp": "c",
+    "system_error": "c",
+    "xlocale": "c"
   },
   "C_Cpp.default.includePath": [
     "inc"

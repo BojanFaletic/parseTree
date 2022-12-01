@@ -61,7 +61,7 @@ void parser_init(parser_t **tree) {
   *tree = (parser_t *)calloc(sizeof(parser_t), 1);
 }
 
-void insert_node(const char *full_name, int value, parser_node_t *nd) {
+void insert_node_chain(const char *full_name, int value, parser_node_t *nd) {
   size_t n_same = n_common_letters(full_name, nd);
   const char *name = &full_name[n_same];
   size_t name_sz = strlen(name);
@@ -76,19 +76,42 @@ void insert_node(const char *full_name, int value, parser_node_t *nd) {
   nd->node = NULL;
   nd->size = 0;
 
-  char *nd_name = &nd->message.data[n_same];
-  add_node(nd_name, value2, nd);
+  // add new node at end
+  char *chain_name = &nd->message.data[n_same];
+  add_node(chain_name, value2, nd);
+  nd->node[0].node = next2;
+  nd->node[0].size = size2;
+}
 
-  size_t id = nd->size - 1;
-  nd->node[id].node = next2;
-  nd->node[id].size = size2;
+void insert_node_branch(const char *full_name, int value, parser_node_t *nd) {
+  size_t n_same = n_common_letters(full_name, nd);
+
+  int value2 = nd->value;
+  parser_node_t *next2 = nd->node;
+  size_t size2 = nd->size;
+
+  // change current node
+  nd->message.size = n_same;
+  nd->value = -1;
+  nd->node = NULL;
+  nd->size = 0;
+
+  char *nd_name = &nd->message.data[n_same];
+
+  // original branch
+  add_node(nd_name, value2, nd);
+  nd->node[0].node = next2;
+  nd->node[0].size = size2;
+
+  // new branch
+  const char *branch_name = &full_name[n_same];
+  add_node(branch_name, value, nd);
 }
 
 void parser_add(const char *name, int const value, parser_t *tree) {
   char *part_name = (char *)name;
   int action;
   parser_node_t *end_node = get_end_node(&part_name, tree, &action);
-  size_t part_name_size = strlen(part_name);
 
   printf("----------\n");
   printf("node_addr: %p\n", end_node);
@@ -97,34 +120,19 @@ void parser_add(const char *name, int const value, parser_t *tree) {
 
   printf("----------\n");
 
-  if (end_node == NULL){
+  if (end_node == NULL) {
+    // root merge
     add_root_node(name, value, tree);
+  } else if (action == 4) {
+    // branch merge
+    insert_node_branch(name, value, end_node);
+  } else if (action == 3) {
+    // insert node in chain
+    insert_node_chain(name, value, end_node);
+  } else if (action == 1) {
+    // update value of node
+    end_node->value = value;
   }
-
-#if 0
-  switch (end_nd_status) {
-  case add_root_e:
-    add_root_node(name, value, tree);
-    break;
-  case add_node_e:
-    assert(false && "add_node_e not impl");
-    break;
-  case assign_existing_e:
-    assert(false && "assign_existing_e not impl");
-    break;
-  case insert_chain_node_e:
-    assert(false && "insert_chain_node_e not impl");
-    break;
-  case insert_branch_e:
-    assert(false && "insert_branch_e not impl");
-    break;
-
-  default:
-    printf("Error node unable to decode\n");
-    exit(1);
-    break;
-  }
-#endif
 }
 
 int parser_parse(char const *name, parser_t *tree) {
@@ -285,21 +293,21 @@ static size_t n_common_letters(const char *name, parser_node_t const *nd) {
   return i;
 }
 
-int get_node_type(size_t n, size_t name_sz, size_t node_sz){
-  if (name_sz == 0){
+int get_node_type(size_t n, size_t name_sz, size_t node_sz) {
+  if (name_sz == 0) {
     return 1; // update just value
   }
 
   size_t max_search = MIN(name_sz, node_sz);
-  if (n == max_search){
-    if (name_sz >= node_sz){
+  if (n == max_search) {
+    if (name_sz >= node_sz) {
       return 2; // keep searching
     }
-    if (name_sz < node_sz){
+    if (name_sz < node_sz) {
       return 3; // insert node in chain
     }
   }
-  if (n < max_search){
+  if (n < max_search) {
     return 4; // insert node and branch
   }
   return 0; // do nothing
@@ -319,16 +327,15 @@ keep_searching:
 
     int status = get_node_type(n, name_sz, node_sz);
 
-    if (status != 0){
-      if (status == 2){
+    if (status != 0) {
+      if (status == 2) {
         *name += node_sz;
         name_sz -= node_sz;
 
         tmp_sz = candidate->size;
         end_nd = candidate->node;
         goto keep_searching;
-      }
-      else{
+      } else {
         *action = status;
         break;
       }
