@@ -38,8 +38,12 @@ int main() {
 #endif
 
   json_obj_t *list;
-  parser_load_json("test/test_out.json", root, &list);
+  parser_load_json("test/out.json", root, &list);
 
+  parser_node_t nodes[root->size];
+  for (size_t i=0; i<root->size; i++){
+    nodes[i] = root->node[i];
+  }
   example("UCXWB",  root);
 
   // freeing object

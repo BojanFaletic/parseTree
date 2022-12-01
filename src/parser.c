@@ -29,8 +29,7 @@ static void link_root_node(parser_t *parent, parser_node_t *child);
 static void add_node(const char *name, int const value, parser_node_t *node);
 static void add_root_node(const char *name, int const value, parser_t *node);
 static size_t n_common_letters(const char *name, parser_node_t const *nd);
-static parser_node_t *get_end_node(char **name, parser_t *tree);
-
+static int get_end_node(char **name, parser_t *tree, parser_node_t **end);
 ///////////////////////////////////////////////////////////////////////////////
 // Parser Functions
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,6 +39,7 @@ void parser_free(parser_t *tree) {
   list_init(&list);
 
   // add first layer
+  printf("Node size: %zu\n", tree->size);
   if (tree->size != 0) {
     list_append(tree->node, list);
   }
@@ -85,33 +85,44 @@ void insert_node(const char *full_name, int value, parser_node_t *nd) {
 
 void parser_add(const char *name, int const value, parser_t *tree) {
   char *part_name = (char *)name;
-  parser_node_t *end_node = get_end_node(&part_name, tree);
+  parser_node_t *end_node;
+  int end_nd_status = get_end_node(&part_name, tree, &end_node);
   size_t part_name_size = strlen(part_name);
-  if (part_name_size == 0) {
-#ifdef PARSER_DEBUG
-    printf("Warning: %s already exists!, overriding value\n", name);
-#endif
-    end_node->value = value;
-    return;
-  }
 
-  if (end_node == NULL) {
+  switch (end_nd_status) {
+  case 0:
+    // insert node at the end
+    break;
+  case 1:
+    /* code */
+    break;
+  case 2:
+    // node already exists assign new value
+    if (part_name_size == 0) {
+#ifdef PARSER_DEBUG
+      printf("Warning: %s already exists!, overriding value\n", name);
+#endif
+      end_node->value = value;
+      return;
+    }
+
+    break;
+
+  case 3:
+    // insert root node
 #ifdef PARSER_DEBUG
     printf("+Adding: %s\n", name);
 #endif
     add_root_node(name, value, tree);
-    return;
-  }
+    break;
 
-  bool is_first_letter_same = name[0] == end_node->message.data[0];
-  bool is_name_shorter = strlen(name) <= end_node->message.size;
-  if (is_first_letter_same && is_name_shorter) {
+  case 4:
+    // split old node, create new node, assign its value
     insert_node(name, value, end_node);
-  }
+    break;
 
-  bool is_part_name_empty = part_name[0] == 0;
-  if (!is_part_name_empty) {
-    add_node(part_name, value, end_node);
+  default:
+    break;
   }
 }
 
@@ -168,6 +179,7 @@ static bool is_valid_node(parser_string_t *name, parser_node_t *node) {
 
 static void map_all_nodes(parser_node_t *nd, list_holder_t *list) {
   if (nd->size != 0) {
+    printf("Node size: %zu\n", nd->size);
     list_append(nd->node, list);
 #ifdef PARSER_DEBUG
     printf("Adding: %zu\n", nd->size);
@@ -272,41 +284,55 @@ static size_t n_common_letters(const char *name, parser_node_t const *nd) {
   return i;
 }
 
-static parser_node_t *get_end_node(char **name, parser_t *tree) {
-  if (tree->size == 0) {
-    return NULL;
-  }
+static int get_end_node(char **name, parser_t *tree, parser_node_t **end) {
+  size_t name_sz = strlen(*name);
+  size_t tmp_sz = tree->size;
+  parser_node_t *tmp_nd = tree->node;
+  int return_code = 3;
 
-  parser_node_t *end = NULL;
-  for (size_t i = 0; i < tree->size; i++) {
-    parser_node_t *candidate = &tree->node[i];
+  bool found_node = false;
+keep_searching:
+  for (size_t i = 0; i < tmp_sz; i++) {
+    parser_node_t *candidate = &tmp_nd[i];
     size_t n = n_common_letters(*name, candidate);
-    if (n == candidate->message.size) {
+    if (n == candidate->message.size && name_sz <= candidate->message.size) {
+      // partial node already exists, but has no value
       *name += n;
-      end = candidate;
+      found_node = true;
+      tmp_nd = candidate;
+
+      return_code = 2;
+      break;
+    if (n != candidate->message.size && name_sz <= candidate->message.size){
+      // partial node does not already exist need to insert node
+      *name += n;
+      found_node = true;
+      tmp_nd = candidate;
+      return_code = 4;
+      break;
+    }
+    } else if (n == candidate->message.size) {
+      // name_sz is still larger than node size, continue searching
+      *name += n;
+      name_sz -= n;
+
+      tmp_nd = candidate;
+      tmp_sz = candidate->size;
+      found_node = true;
+      return_code = 0;
+      goto keep_searching;
+    } else if (n != 0) {
+      // found some partial matching with two nodes, but no exact solution
+      *name += n;
+      tmp_nd = candidate;
+      found_node = true;
+      return_code = 1;
       break;
     }
   }
 
-  if (end == NULL) {
-    return NULL;
-  }
-
-  parser_string_t string = {.data = (char *)*name, .size = strlen(*name)};
-
-keep_searching:
-  for (size_t n = 0; n < end->size; n++) {
-    parser_node_t *candidate = &end->node[n];
-    if (is_valid_node(&string, candidate)) {
-      string.size -= candidate->message.size;
-      string.data += candidate->message.size;
-
-      end = candidate;
-      goto keep_searching;
-    }
-  }
-  *name = string.data;
-  return end;
+  *end = (found_node) ? tmp_nd : NULL;
+  return return_code;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
