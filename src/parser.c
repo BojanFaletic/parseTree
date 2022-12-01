@@ -39,8 +39,10 @@ void parser_free(parser_t *tree) {
   list_holder_t *list;
   list_init(&list);
 
-  // add first layer
+#ifdef PARSER_DEBUG
   printf("Node size: %zu\n", tree->size);
+#endif
+  // add first layer
   if (tree->size != 0) {
     list_append(tree->node, list);
   }
@@ -113,13 +115,6 @@ void parser_add(const char *name, int const value, parser_t *tree) {
   int action;
   parser_node_t *end_node = get_end_node(&part_name, tree, &action);
 
-  printf("----------\n");
-  printf("node_addr: %p\n", end_node);
-  printf("name: %s\n", part_name);
-  printf("action: %d\n", action);
-
-  printf("----------\n");
-
   if (end_node == NULL) {
     // root merge
     add_root_node(name, value, tree);
@@ -132,8 +127,7 @@ void parser_add(const char *name, int const value, parser_t *tree) {
   } else if (action == 1) {
     // update value of node
     end_node->value = value;
-  }
-  else if (action == 5){
+  } else if (action == 5) {
     // normal adding of node
     add_node(part_name, value, end_node);
   }
@@ -192,11 +186,12 @@ static bool is_valid_node(parser_string_t *name, parser_node_t *node) {
 
 static void map_all_nodes(parser_node_t *nd, list_holder_t *list) {
   if (nd->size != 0) {
-    printf("Node size: %zu\n", nd->size);
-    list_append(nd->node, list);
 #ifdef PARSER_DEBUG
+    printf("Node size: %zu\n", nd->size);
     printf("Adding: %zu\n", nd->size);
 #endif
+    list_append(nd->node, list);
+
   }
 
   for (size_t i = 0; i < nd->size; i++) {
@@ -269,8 +264,6 @@ static void link_root_node(parser_t *parent, parser_node_t *child) {
 
 static void add_node(const char *name, int const value, parser_node_t *node) {
   parser_node_t child;
-  printf("%s, size: %zu\n", name, node->size);
-  //assert(node->size != 0);
   make_empty_node(name, value, &child);
   link_node(node, &child);
 #ifdef PARSER_DEBUG
@@ -335,7 +328,7 @@ keep_searching:
     int status = get_node_type(n, name_sz, node_sz);
 
     if (status != 0) {
-      if (status == 3){
+      if (status == 3) {
         *action = 3;
         prev_nd = candidate;
         break;
@@ -345,7 +338,7 @@ keep_searching:
         *name += node_sz;
         name_sz -= node_sz;
 
-        if (candidate->node == NULL){
+        if (candidate->node == NULL) {
           // return this node because next is null
           *action = 5;
           prev_nd = candidate;

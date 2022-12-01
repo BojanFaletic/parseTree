@@ -38,13 +38,10 @@ int main() {
 #endif
 
   json_obj_t *list;
-  parser_load_json("test_cases/full.json", root, &list);
+  parser_load_json("test/test_out.json", root, &list);
 
   example("WQK",  root);
-  example("WQKL",  root);
-  example("WM",  root);
   example("W",  root);
-  example("WQ",  root);
 
 
   // freeing object
