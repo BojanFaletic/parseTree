@@ -269,6 +269,8 @@ static void link_root_node(parser_t *parent, parser_node_t *child) {
 
 static void add_node(const char *name, int const value, parser_node_t *node) {
   parser_node_t child;
+  printf("%s, size: %zu\n", name, node->size);
+  //assert(node->size != 0);
   make_empty_node(name, value, &child);
   link_node(node, &child);
 #ifdef PARSER_DEBUG
@@ -311,7 +313,7 @@ int get_node_type(size_t n, size_t name_sz, size_t node_sz) {
       return 3; // insert node in chain
     }
   }
-  if (n < max_search) {
+  if (n != 0) {
     return 4; // insert node and branch
   }
   return 0; // do nothing
@@ -321,6 +323,7 @@ static parser_node_t *get_end_node(char **name, parser_t *tree, int *action) {
   size_t name_sz = strlen(*name);
   size_t tmp_sz = tree->size;
   parser_node_t *end_nd = (tmp_sz != 0) ? tree->node : NULL;
+  parser_node_t *prev_nd = end_nd;
 
   *action = 5;
 keep_searching:
@@ -336,8 +339,15 @@ keep_searching:
         *name += node_sz;
         name_sz -= node_sz;
 
+        if (candidate->node == NULL){
+          // return this node because next is null
+          *action = 5;
+          break;
+        }
+
+        prev_nd = candidate;
         tmp_sz = candidate->size;
-        end_nd = candidate;
+        end_nd = candidate->node;
         goto keep_searching;
       } else {
         *action = status;
@@ -345,6 +355,7 @@ keep_searching:
       }
     }
   }
+  end_nd = prev_nd;
   return end_nd;
 }
 

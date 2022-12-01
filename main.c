@@ -40,8 +40,10 @@ int main() {
   json_obj_t *list;
   parser_load_json("test_cases/add_new.json", root, &list);
 
-  example("WMK",  root);
   example("WM",  root);
+  example("WMK",  root);
+  example("WMU",  root);
+  example("WMA",  root);
 
   // freeing object
   parser_free(root);
