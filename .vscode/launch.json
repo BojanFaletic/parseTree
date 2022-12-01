@@ -13,7 +13,8 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "console": "externalTerminal"
+            "console": "externalTerminal",
+            "preLaunchTask": "C/C++: clang++ build active file",
         },
         {
             "name": "clang++ - Build and PARSER_DEBUG active file",
