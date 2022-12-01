@@ -44,6 +44,9 @@ int main() {
   example("WMK",  root);
   example("WMU",  root);
   example("WMA",  root);
+  example("WMAA",  root);
+  example("WMAB",  root);
+  example("WMABC",  root);
 
   // freeing object
   parser_free(root);

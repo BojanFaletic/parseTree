@@ -342,6 +342,7 @@ keep_searching:
         if (candidate->node == NULL){
           // return this node because next is null
           *action = 5;
+          prev_nd = candidate;
           break;
         }
 
