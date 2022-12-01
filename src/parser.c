@@ -128,7 +128,7 @@ void parser_add(const char *name, int const value, parser_t *tree) {
     insert_node_branch(name, value, end_node);
   } else if (action == 3) {
     // insert node in chain
-    insert_node_chain(name, value, end_node);
+    insert_node_chain(part_name, value, end_node);
   } else if (action == 1) {
     // update value of node
     end_node->value = value;
@@ -335,6 +335,12 @@ keep_searching:
     int status = get_node_type(n, name_sz, node_sz);
 
     if (status != 0) {
+      if (status == 3){
+        *action = 3;
+        prev_nd = candidate;
+        break;
+      }
+
       if (status == 2) {
         *name += node_sz;
         name_sz -= node_sz;
