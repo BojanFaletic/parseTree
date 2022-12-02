@@ -15,7 +15,7 @@ jobs:
         run: sudo apt-get install libgtest-dev
       - uses: actions/checkout@v3
       - name: make test case file
-        run: cd test && make gen_tests && ./gen_tests -min 5 -max 20 -N 10000 -f test_out.json
+        run: cd test && make gen_tests && ./gen_tests -min 5 -max 20 -N 10000 -f test/test_out.json
       - name: run tests
         run: cd test && make tests && ./test
       - name: static_check_test
