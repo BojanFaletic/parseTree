@@ -12,9 +12,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: run_tests
-        run: cd test && make && ./main
+      - name: run tests
+        run: cd test && make tests && ./test
       - name: static_check_test
         run: cd test && make static
-      - name: static_check_main
-        run: make static
