@@ -6,7 +6,6 @@
 
 #define MAX_STRING_SIZE 10
 
-
 void parser_load_json(const char *f_name, parser_t *obj, json_obj_t **json) {
   FILE *ptr = fopen(f_name, "r");
   if (ptr == NULL) {
@@ -69,11 +68,9 @@ void parser_load_json(const char *f_name, parser_t *obj, json_obj_t **json) {
         value_data[key_counter] = 0;
         list_append(value_data, *json);
 
-        // todo check if key is decoded correctly
         int int_value = atoi(value);
         parser_add(value_data, int_value, obj);
 
-        // printf("%s : %s\n", key, value);
         for (size_t i = 0; i < key_counter; i++) {
           key[i] = 0;
         }
@@ -93,7 +90,6 @@ void parser_load_json(const char *f_name, parser_t *obj, json_obj_t **json) {
     }
 
     if (ch != EOF) {
-      // printf("%c", ch);
     } else {
       break;
     }

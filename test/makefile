@@ -3,10 +3,13 @@ CBUILD = -Wall -Wextra --std=c17
 SRCS = main.c tests.c ../src/parser.c ../src/list.c ../src/loader.c
 INC = -I../inc
 
-.PHONY: benchmark release tests
+.PHONY: benchmark release tests syntax
 
 all: $(SRCS)
 	$(CC) $^ $(CBUILD) -o main -fsanitize=address $(INC)
+
+syntax: $(SRCS)
+	$(CC) $^ $(CBUILD) -Wpedantic -Werror -fsyntax-only -O0 $(INC)
 
 static: $(SRCS)
 	$(CC) $^ $(CBUILD) -o main -fsanitize=address -Wpedantic -Werror $(INC)
