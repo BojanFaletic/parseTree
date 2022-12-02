@@ -1,5 +1,5 @@
 CBUILD = -Wall -Wextra --std=c17 -O0
-SRCS = main.c src/parser.c src/list.c
+SRCS = main.c src/parser.c src/list.c src/loader.c
 INC = -Iinc
 
 

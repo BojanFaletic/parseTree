@@ -10,10 +10,10 @@
                 "-g",
                 "-DPARSER_DEBUG",
                 "main.c",
+                "src/loader.c",
                 "src/parser.c",
                 "src/list.c",
                 "-Iinc",
-                "-Itest",
                 "-o",
                 "main"
             ],

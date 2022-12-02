@@ -1,5 +1,7 @@
-#include "parser.h"
 #include <stdio.h>
+#include "list.h"
+#include "parser.h"
+#include "loader.h"
 
 void example(const char *word, parser_t *obj) {
   printf("Parser value: %d == %s\n", parser_parse(word, obj), word);
@@ -9,6 +11,16 @@ void test_item(const char *name, parser_t *root) {
   static int cnt = 0;
   parser_add(name, ++cnt, root);
   example(name, root);
+}
+
+void example_all(json_obj_t *list, parser_t *root){
+  while (list->next != NULL){
+    char *data = list->data;
+    example(data, root);
+    list = list->next;
+  }
+  char *data = list->data;
+  example(data, root);
 }
 
 int main() {
@@ -35,24 +47,16 @@ int main() {
   example(data4, root);
 #endif
 
-  if (0){
-    test_item("H", root);
-    test_item("He", root);
-    test_item("Hell", root);
-    test_item("Hello", root);
-    test_item("Wee", root);
-    test_item("W", root);
-  }
+  json_obj_t *list;
+  parser_load_json("test/small.json", root, &list);
 
-  if (0){
-    test_item("H", root);
-    test_item("H", root);
-  }
 
-  test_item("Wee", root);
-  test_item("W", root);
+  example_all(list, root);
+
 
   // freeing object
   parser_free(root);
+  parser_free_json(list);
+
   return 0;
 }
