@@ -21,7 +21,7 @@ tests: $(SRCS)
 	$(CC) $(CBUILD) ../src/parser.c -I../inc -c -O2 --std=c17
 	$(CC) $(CBUILD) ../src/list.c -I../inc -c -O2 --std=c17
 	$(CC) $(CBUILD) ../src/loader.c -I../inc -c -O2 --std=c17
-	$(CC)++ test.cpp loader.o parser.o list.o -I../inc -O2 --std=c++20 -lgtest -o test
+	$(CC)++ test.cpp loader.o parser.o list.o -I../inc -O2 --std=c++20 -lgtest -pthread -o test
 
 PARSER_DEBUG: $(SRCS)
 	$(CC) $^ $(CBUILD) -o main -fsanitize=address -DPARSER_DEBUG $(INC)
