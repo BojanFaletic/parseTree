@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Install gtest manually
+        run: sudo apt-get install libgtest-dev
       - uses: actions/checkout@v3
       - name: run tests
         run: cd test && make tests && ./test
