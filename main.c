@@ -13,6 +13,16 @@ void test_item(const char *name, parser_t *root) {
   example(name, root);
 }
 
+void example_all(json_obj_t *list, parser_t *root){
+  while (list->next != NULL){
+    char *data = list->data;
+    example(data, root);
+    list = list->next;
+  }
+  char *data = list->data;
+  example(data, root);
+}
+
 int main() {
   // init parser object
   parser_t *root;
@@ -38,10 +48,10 @@ int main() {
 #endif
 
   json_obj_t *list;
-  parser_load_json("test/test_out.json", root, &list);
+  parser_load_json("test/small.json", root, &list);
 
-  example("WQK",  root);
-  example("W",  root);
+
+  example_all(list, root);
 
 
   // freeing object

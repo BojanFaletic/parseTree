@@ -316,7 +316,7 @@ static parser_node_t *get_end_node(char **name, parser_t *tree, int *action) {
   size_t name_sz = strlen(*name);
   size_t tmp_sz = tree->size;
   parser_node_t *end_nd = (tmp_sz != 0) ? tree->node : NULL;
-  parser_node_t *prev_nd = end_nd;
+  parser_node_t *prev_nd = NULL;
 
   *action = 5;
 keep_searching:
@@ -334,9 +334,22 @@ keep_searching:
         break;
       }
 
+      if (status == 4){
+        *action = 4;
+        prev_nd = candidate;
+        break;
+      }
+
       if (status == 2) {
         *name += node_sz;
         name_sz -= node_sz;
+
+        // if name == 0, then replace value of existing node
+        if (name_sz == 0){
+          *action = 1;
+          prev_nd = candidate;
+          break;
+        }
 
         if (candidate->node == NULL) {
           // return this node because next is null
