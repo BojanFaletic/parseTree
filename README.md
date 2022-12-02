@@ -23,9 +23,12 @@ This is still in development and not yet sufficiently tested for deploying in pr
 
 ## Benchmark
 
-Benchmark      | Time          | CPU        |Iterations
- ---           | ---           | ---        | ---
-ParserParse    |   9.84 ns     |    9.84 ns |    69718658
-NaiveParse     |   12.2 ns     |    12.2 ns |    56507811
+Benchmark                   | Time            | CPU           |Iterations
+ ---                        | ---             | ---           | ---
+ParserParse                 |      10.3 ns    |     10.3 ns   |  64872132
+NaiveParse                  |      12.3 ns    |     12.3 ns   |  56028453
+Load_10_000_elements        | 223447185 ns    |223327596 ns   |         3
+Parse_10_000_elements       |     49.8 ns     |    49.8 ns    | 13979973
+Parse_10_000_elements_naive |     14606 ns    |    14600 ns   |     47617
 
 Result of running Google Benchmark on `test/benchmark.cpp`. Parser is faster than naive strcmp.
