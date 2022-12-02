@@ -8,3 +8,4 @@ benchmark
 test/*.json
 test/gen_tests
 test/test
+!test/test_out.json
