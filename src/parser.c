@@ -20,14 +20,14 @@ static void print_node(parser_node_t *nd);
 #endif
 
 // Utility
-static void make_empty_node(const char *name, int const value,
+static void make_empty_node(parser_string_t st, int const value,
                             parser_node_t *child);
 static bool is_valid_node(parser_string_t *name, parser_node_t *node);
 static void map_all_nodes(parser_node_t *nd, list_holder_t *list);
 static void free_all_nodes_in_list(list_holder_t *list);
 static void link_node(parser_node_t *parent, parser_node_t *child);
 static void link_root_node(parser_t *parent, parser_node_t *child);
-static void add_node(const char *name, int const value, parser_node_t *node);
+static void add_node(parser_string_t st, int const value, parser_node_t *node);
 static void add_root_node(const char *name, int const value, parser_t *node);
 static size_t n_common_letters(const char *name, parser_node_t const *nd);
 static parser_node_t *get_end_node(char **name, parser_t *tree, int *action);
@@ -74,13 +74,14 @@ void insert_node_chain(const char *full_name, int value, parser_node_t *nd) {
 
   // change current node
   nd->message.size = n_same;
-  nd->value = (name_sz == 0) ? value : -1;
+  nd->value = (name_sz == 0) ? value : nd->value;
   nd->node = NULL;
   nd->size = 0;
 
   // add new node at end
   char *chain_name = &nd->message.data[n_same];
-  add_node(chain_name, value2, nd);
+  parser_string_t pr = {.data = chain_name, .size = strlen(chain_name)};
+  add_node(pr, value2, nd);
   nd->node[0].node = next2;
   nd->node[0].size = size2;
 }
@@ -93,21 +94,24 @@ void insert_node_branch(const char *full_name, int value, parser_node_t *nd) {
   size_t size2 = nd->size;
 
   // change current node
+  parser_string_t orig_msg = {.data = nd->message.data + n_same,
+                              .size = nd->message.size - n_same};
+
   nd->message.size = n_same;
   nd->value = -1;
   nd->node = NULL;
   nd->size = 0;
 
-  char *nd_name = &nd->message.data[n_same];
-
   // original branch
-  add_node(nd_name, value2, nd);
+  add_node(orig_msg, value2, nd);
+  assert(nd->size == 1);
   nd->node[0].node = next2;
   nd->node[0].size = size2;
 
   // new branch
-  const char *branch_name = &full_name[n_same];
-  add_node(branch_name, value, nd);
+  parser_string_t branch_msg = {.data = (char *)&full_name[n_same],
+                                .size = strlen(&full_name[n_same])};
+  add_node(branch_msg, value, nd);
 }
 
 void parser_add(const char *name, int const value, parser_t *tree) {
@@ -120,7 +124,7 @@ void parser_add(const char *name, int const value, parser_t *tree) {
     add_root_node(name, value, tree);
   } else if (action == 4) {
     // branch merge
-    insert_node_branch(name, value, end_node);
+    insert_node_branch(part_name, value, end_node);
   } else if (action == 3) {
     // insert node in chain
     insert_node_chain(part_name, value, end_node);
@@ -129,7 +133,8 @@ void parser_add(const char *name, int const value, parser_t *tree) {
     end_node->value = value;
   } else if (action == 5) {
     // normal adding of node
-    add_node(part_name, value, end_node);
+    parser_string_t pr = {.data = part_name, .size = strlen(part_name)};
+    add_node(pr, value, end_node);
   }
 }
 
@@ -191,7 +196,6 @@ static void map_all_nodes(parser_node_t *nd, list_holder_t *list) {
     printf("Adding: %zu\n", nd->size);
 #endif
     list_append(nd->node, list);
-
   }
 
   for (size_t i = 0; i < nd->size; i++) {
@@ -236,13 +240,10 @@ static void link_node(parser_node_t *parent, parser_node_t *child) {
   free(current_nodes);
 }
 
-static void make_empty_node(const char *name, int const value,
+static void make_empty_node(parser_string_t st, int const value,
                             parser_node_t *child) {
-  *child = (parser_node_t){
-      .node = NULL,
-      .size = 0,
-      .message = (parser_string_t){.data = (char *)name, .size = strlen(name)},
-      .value = value};
+  *child =
+      (parser_node_t){.node = NULL, .size = 0, .message = st, .value = value};
 }
 
 static void link_root_node(parser_t *parent, parser_node_t *child) {
@@ -262,18 +263,19 @@ static void link_root_node(parser_t *parent, parser_node_t *child) {
   free(current_nodes);
 }
 
-static void add_node(const char *name, int const value, parser_node_t *node) {
+static void add_node(parser_string_t st, int const value, parser_node_t *node) {
   parser_node_t child;
-  make_empty_node(name, value, &child);
+  make_empty_node(st, value, &child);
   link_node(node, &child);
 #ifdef PARSER_DEBUG
-  printf("+Adding: %s\n", name);
+  printf("+Adding: %s\n", st.data);
 #endif
 }
 
 static void add_root_node(const char *name, int const value, parser_t *node) {
   parser_node_t child;
-  make_empty_node(name, value, &child);
+  parser_string_t pr = {.data=(char*)name, .size=strlen(name)};
+  make_empty_node(pr, value, &child);
   link_root_node(node, &child);
 #ifdef PARSER_DEBUG
   printf("+Adding: %s\n", name);
@@ -334,7 +336,7 @@ keep_searching:
         break;
       }
 
-      if (status == 4){
+      if (status == 4) {
         *action = 4;
         prev_nd = candidate;
         break;
@@ -345,7 +347,7 @@ keep_searching:
         name_sz -= node_sz;
 
         // if name == 0, then replace value of existing node
-        if (name_sz == 0){
+        if (name_sz == 0) {
           *action = 1;
           prev_nd = candidate;
           break;

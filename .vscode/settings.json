@@ -19,7 +19,10 @@
     "cstring": "c",
     "*.ipp": "c",
     "system_error": "c",
-    "xlocale": "c"
+    "xlocale": "c",
+    "hash_map": "c",
+    "bitset": "c",
+    "initializer_list": "c"
   },
   "C_Cpp.default.includePath": [
     "inc"
