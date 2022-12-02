@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_STRING_SIZE 10
+#define MAX_STRING_SIZE 100
 
 void parser_load_json(const char *f_name, parser_t *obj, json_obj_t **json) {
   FILE *ptr = fopen(f_name, "r");
