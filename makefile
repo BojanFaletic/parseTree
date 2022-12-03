@@ -1,19 +1,26 @@
-CBUILD = -Wall -Wextra --std=c17 -O0
-SRCS = main.c src/parser.c src/list.c src/loader.c
-INC = -Iinc
+CC:=clang
+CBUILD:=-Wall -Wextra --std=c17
+SRCS=main.c $(wildcard src/*c)
+INC:=-Iinc
 
+.PHONY:clear
+all: basic
 
-all: $(SRCS)
-	clang $^ $(CBUILD) -o main -fsanitize=address $(INC)
+# Normal build with no optimization and address sanitizer
+basic: $(SRCS)
+	$(CC) $^ $(CBUILD) -o main -fsanitize=address $(INC)
 
+# Build with optimization used for release
 release: $(SRCS)
-	clang $^ $(CBUILD) -O2 -o main $(INC)
+	$(CC) $^ $(CBUILD) -O2 -o main $(INC)
 
+# Check for syntax errors
 static: $(SRCS)
-	clang $^ $(CBUILD) -o main -fsanitize=address -Wpedantic -Werror $(INC)
+	$(CC) $^ $(CBUILD) -fsyntax-only -Wpedantic -Werror $(INC)
 
+# Basic build with debug output
 debug: $(SRCS)
-	clang $^ $(CBUILD) -o main -fsanitize=address -DPARSER_DEBUG $(INC)
+	$(CC) $^ $(CBUILD) -o main -fsanitize=address -DPARSER_DEBUG $(INC)
 
 clear:
 	@rm -f main
